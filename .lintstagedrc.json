@@ -1,0 +1,4 @@
+{
+  "*.{js,cjs,jsx,ts,cts,tsx}": "eslint",
+  "*.{css,js,cjs,jsx,ts,cts,tsx,json,yaml,yml,md,mdx}": "prettier -w"
+}

@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+.temp/
+/.react-router/
+/node_modules/
+/build/
+temp/
+.env*
+!.env.example
+.DS_Store
