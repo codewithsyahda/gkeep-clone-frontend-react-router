@@ -2,13 +2,14 @@ import eslintJs from '@eslint/js';
 import eslintCfgPrettier from 'eslint-config-prettier/flat';
 import eslintPlgReact from 'eslint-plugin-react';
 import eslintPlgReactHooks from 'eslint-plugin-react-hooks';
+import eslintPlgStorybook from 'eslint-plugin-storybook';
 import eslintPlgUnusedImports from 'eslint-plugin-unused-imports';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['.temp/', '.react-router/', 'build/', 'temp/']),
+  globalIgnores(['.temp/', '.react-router/', '!.storybook', 'build/', 'temp/']),
   {
     files: ['**/*.{js,ts,tsx}'],
     plugins: {
@@ -31,6 +32,7 @@ export default defineConfig([
   },
   eslintPlgReactHooks.configs.flat.recommended,
   tseslint.configs.recommended,
+  eslintPlgStorybook.configs['flat/recommended'],
   {
     plugins: {
       'unused-imports': eslintPlgUnusedImports,
