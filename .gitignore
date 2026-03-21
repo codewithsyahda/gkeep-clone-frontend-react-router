@@ -4,6 +4,7 @@
 /.react-router/
 /node_modules/
 /build/
+/coverage/
 temp/
 .env*
 !.env.example
