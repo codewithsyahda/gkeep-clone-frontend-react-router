@@ -15,6 +15,8 @@
     "lint": "eslint .",
     "format:c": "prettier -c .",
     "format:w": "prettier -w .",
+    "test": "vitest",
+    "test:ci": "vitest run --coverage",
     "typecheck": "react-router typegen && tsc",
     "prepare": "husky",
     "sb": "storybook dev -p 6006",
