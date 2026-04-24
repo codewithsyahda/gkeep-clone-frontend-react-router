@@ -12,14 +12,7 @@ const config: StorybookConfig = {
     '@storybook/addon-docs',
     '@storybook/addon-onboarding',
   ],
-  framework: {
-    name: '@storybook/react-vite',
-    options: {
-      builder: {
-        viteConfigPath: 'vite-storybook.config.ts',
-      },
-    },
-  },
+  framework: '@storybook/react-vite',
 };
 
 export default config;
