@@ -1,32 +1,111 @@
 name: Playwright Tests
+
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
+
 jobs:
-  test:
+  playwright_test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    environment: CI
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: db_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout frontend repo
+        uses: actions/checkout@v7
+        with:
+          path: frontend
+
+      - name: Checkout backend repo
+        uses: actions/checkout@v7
+        with:
+          repository: codewithsyahda/gkeep-clone-backend-nodejs-fastify
+          path: backend
+
       - name: Install pnpm
         uses: pnpm/action-setup@v6
         with:
           version: 11
-      - uses: actions/setup-node@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
-      - name: Install dependencies
-        run: pnpm install
+          cache-dependency-path: |
+            frontend/pnpm-lock.yaml
+            backend/pnpm-lock.yaml
+
+      - name: Install backend dependencies
+        run: cd backend && pnpm ci
+
+      - name: Generate backend Prisma client
+        run: cd backend && pnpm dlx prisma generate
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
+
+      - name: Backend Prisma migrate deploy
+        run: cd backend && pnpm dlx prisma migrate deploy
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
+
+      - name: Build backend
+        run: cd backend && pnpm run build
+
+      - name: Run backend application
+        run: cd backend && pnpm run start:e2e &
+        env:
+          NODE_ENV: ci
+          PORT: 5000
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          BETTER_AUTH_URL: http://localhost:5000
+          BETTER_AUTH_TRUSTED_ORIGINS: http://localhost:3000
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
+
+      - name: Check backend application
+        run: pnpm dlx wait-on http-get://localhost:5000/api/v1/auth/ok -t 30000
+
+      - name: Run backend helper application
+        run: cd backend && pnpm run dev:e2e &
+        env:
+          NODE_ENV: ci
+          PORT_E2E: 5010
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
+
+      - name: Check backend helper application
+        run: pnpm dlx wait-on http-get://localhost:5010/api/health/liveness -t 30000
+
+      - name: Install frontend dependencies
+        run: cd frontend && pnpm install
+
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
+        run: cd frontend && pnpm exec playwright install --with-deps
+
+      - name: Build frontend
+        run: cd frontend && pnpm run build
+        env:
+          VITE_API_BASE_URL: http://localhost:5000/api/v1
+
       - name: Run Playwright tests
-        run: pnpm exec playwright test
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+        run: cd frontend && pnpm exec playwright test
+        env:
+          E2E_API_HELPER_BASE_URL: http://localhost:5010/api

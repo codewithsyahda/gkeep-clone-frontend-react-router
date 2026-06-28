@@ -1,4 +1,6 @@
 .react-router/
 node_modules/
 build/
+
+public/mockServiceWorker.js
 pnpm-lock.yaml
