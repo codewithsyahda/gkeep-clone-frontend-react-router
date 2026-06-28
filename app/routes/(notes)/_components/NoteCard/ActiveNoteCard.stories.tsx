@@ -1,0 +1,278 @@
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { delay, http, HttpResponse } from 'msw';
+import { Toaster } from 'sonner';
+import {
+  reactRouterParameters,
+  withRouter,
+} from 'storybook-addon-remix-react-router';
+import { expect, waitFor } from 'storybook/test';
+
+import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import envConfig from '~/configs/envs';
+import ActiveNoteCardComponent from './ActiveNoteCard';
+
+export const patchNoteSuccessByIdHandler = http.patch<{
+  noteId: string;
+}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
+  await delay('real');
+  return HttpResponse.json(null);
+});
+
+const meta = {
+  title: 'Composites/ActiveNoteCard',
+  component: ActiveNoteCardComponent,
+  parameters: {
+    layout: 'centered',
+    msw: {
+      handlers: [patchNoteSuccessByIdHandler],
+    },
+    reactRouter: reactRouterParameters({
+      routing: {
+        path: '/*',
+      },
+    }),
+  },
+  decorators: [
+    reactQueryDecorator,
+    withRouter,
+    (Story) => {
+      return (
+        <>
+          <div className="min-w-sm">
+            <Story />
+          </div>
+          <Toaster duration={Infinity} />
+        </>
+      );
+    },
+  ],
+  excludeStories: ['patchNoteSuccessByIdHandler'],
+} satisfies Meta<typeof ActiveNoteCardComponent>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+const args = {
+  noteId: 'id-note-1',
+  noteTitle: 'Note Title 1',
+  jsonContent:
+    '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Note 1 Heading 1"}]},{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"Note 1 Heading 2"}]},{"type":"paragraph","content":[{"type":"text","text":"Note 1 "},{"type":"text","marks":[{"type":"bold"}],"text":"paragraph"},{"type":"text","text":" 1."}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list bullet 1"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list bullet 2"}]}]}]},{"type":"paragraph","content":[{"type":"text","text":"Note 1 "},{"type":"text","marks":[{"type":"italic"}],"text":"paragraph"},{"type":"text","text":" "},{"type":"text","marks":[{"type":"underline"}],"text":"2"},{"type":"text","text":"."}]},{"type":"orderedList","attrs":{"start":1,"type":null},"content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list #1"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list #2"}]}]}]},{"type":"paragraph"}]}',
+  updatedAt: new Date(2026, 0, 1).toISOString(),
+};
+
+export const Default: Story = {
+  args,
+};
+
+export const ShowedNoteInfo: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Info',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByText('Last edited • Jan, 01 2026'),
+      ).toBeInTheDocument();
+    });
+  },
+};
+
+export const ClosedNoteInfo: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Info',
+      }),
+    );
+
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Info',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByText('Last edited • Jan, 01 2026'),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const Archiving: Story = {
+  args,
+  parameters: {
+    msw: {
+      handlers: [
+        http.patch<{
+          noteId: string;
+        }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
+          await delay('infinite');
+        }),
+      ],
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Archive',
+      }),
+    );
+
+    await expect(
+      canvas.getByRole('button', { name: 'Archive' }),
+    ).toBeDisabled();
+
+    await expect(canvas.getByRole('button', { name: 'Trash' })).toBeDisabled();
+  },
+};
+
+export const ArchiveSuccess: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Archive',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(canvas.getByText('Note archived')).toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', { name: 'Archive' }),
+    ).toBeDisabled();
+
+    await expect(canvas.getByRole('button', { name: 'Trash' })).toBeDisabled();
+  },
+};
+
+export const ArchiveError: Story = {
+  args,
+  parameters: {
+    msw: {
+      handlers: [
+        http.patch<{
+          noteId: string;
+        }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
+          await delay('real');
+          return HttpResponse.json(null, { status: 500 });
+        }),
+      ],
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Archive',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByText('Archiving note failed'),
+      ).toBeInTheDocument();
+
+      await expect(
+        canvas.queryByRole('button', { name: 'Undo' }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', { name: 'Archive' }),
+      ).not.toBeDisabled();
+
+      await expect(
+        canvas.getByRole('button', { name: 'Trash' }),
+      ).not.toBeDisabled();
+    });
+  },
+};
+
+export const Trashing: Story = {
+  args,
+  parameters: { ...Archiving.parameters },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Trash',
+      }),
+    );
+
+    await expect(canvas.getByRole('button', { name: 'Trash' })).toBeDisabled();
+
+    await expect(
+      canvas.getByRole('button', { name: 'Archive' }),
+    ).toBeDisabled();
+  },
+};
+
+export const TrashSuccess: Story = {
+  args,
+  parameters: { ...ArchiveSuccess.parameters },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Trash',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(canvas.getByText('Note trashed')).toBeInTheDocument();
+
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Undo',
+        }),
+      ).toBeInTheDocument();
+    });
+
+    await expect(canvas.getByRole('button', { name: 'Trash' })).toBeDisabled();
+
+    await expect(
+      canvas.getByRole('button', { name: 'Archive' }),
+    ).toBeDisabled();
+  },
+};
+
+export const TrashError: Story = {
+  args,
+  parameters: { ...ArchiveError.parameters },
+  play: async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: 'Trash',
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByText('Trashing note failed'),
+      ).toBeInTheDocument();
+
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Undo',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', { name: 'Trash' }),
+      ).not.toBeDisabled();
+
+      await expect(
+        canvas.getByRole('button', { name: 'Archive' }),
+      ).not.toBeDisabled();
+    });
+  },
+};

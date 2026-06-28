@@ -4,9 +4,12 @@ import { defineConfig, devices } from '@playwright/test';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+import dotenv from 'dotenv';
+import path from 'node:path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+
+const isCI = process.env.CI;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -16,18 +19,17 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: !!process.env.CI,
+  forbidOnly: !!isCI,
   /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  retries: isCI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
+  workers: isCI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: isCI ? 'dot' : 'list',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
-
+    baseURL: 'http://localhost:3000',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
@@ -37,16 +39,45 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testIgnore: ['tests/e2e/screens/mobile/**'],
+      expect: {
+        timeout: 30_000,
+      },
+      timeout: 60_000,
+    },
+
+    {
+      name: 'Galaxy S9+',
+      use: { ...devices['Galaxy S9+'] },
+      testIgnore: ['tests/e2e/screens/desktop/**'],
+    },
+
+    {
+      name: 'Pixel 5',
+      use: { ...devices['Pixel 5'] },
+      testIgnore: ['tests/e2e/screens/desktop/**'],
+    },
+
+    {
+      name: 'iPhone 12',
+      use: { ...devices['iPhone 12'] },
+      testIgnore: ['tests/e2e/screens/desktop/**'],
+      expect: {
+        timeout: 30_000,
+      },
+      timeout: 60_000,
     },
 
     /* Test against mobile viewports. */
@@ -71,9 +102,9 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'pnpm run start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !isCI,
+  },
 });

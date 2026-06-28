@@ -1,6 +1,19 @@
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
+import '../app/app.css';
+
 import type { Preview } from '@storybook/react-vite';
+import { initialize, mswLoader } from 'msw-storybook-addon';
+
+import muiThemeDecorator from './decorators/muiTheme';
+
+initialize();
 
 const preview: Preview = {
+  loaders: [mswLoader],
   parameters: {
     controls: {
       matchers: {
@@ -15,6 +28,7 @@ const preview: Preview = {
       test: 'todo',
     },
   },
+  decorators: [muiThemeDecorator],
 };
 
 export default preview;

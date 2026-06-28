@@ -9,6 +9,7 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 const isRR7 = process.env.IS_RR7 === 'true';
+const isCI = process.env.CI === 'true';
 
 export default defineConfig({
   plugins: [
@@ -17,12 +18,29 @@ export default defineConfig({
     tsconfigPaths(),
   ],
   test: {
+    coverage: {
+      exclude: [
+        '**/*.tsx',
+        'app/**/*hooks/**/*.ts',
+        'app/tests/mocks/**/*.ts',
+        '.storybook/**/*.ts',
+      ],
+    },
     projects: [
       {
+        extends: true,
         test: {
           name: 'unit',
           environment: 'node',
-          include: ['**/app/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+          include: ['**/app/**/*.{test,spec}.ts'],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'dom',
+          environment: 'jsdom',
+          include: ['**/app/**/*.{test,spec}.tsx'],
         },
       },
       {
@@ -46,6 +64,8 @@ export default defineConfig({
               },
             ],
           },
+          maxWorkers: isCI ? 1 : undefined,
+          fileParallelism: !isCI,
           setupFiles: ['.storybook/vitest.setup.ts'],
         },
       },

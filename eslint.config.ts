@@ -1,4 +1,5 @@
 import eslintJs from '@eslint/js';
+import eslintPlgQuery from '@tanstack/eslint-plugin-query';
 import eslintCfgPrettier from 'eslint-config-prettier/flat';
 import eslintPlgReact from 'eslint-plugin-react';
 import eslintPlgReactHooks from 'eslint-plugin-react-hooks';
@@ -9,7 +10,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
-  globalIgnores(['.temp/', '.react-router/', '!.storybook', 'build/', 'temp/']),
+  globalIgnores([
+    '.temp/',
+    '.react-router/',
+    '!.storybook',
+    'build/',
+    'temp/',
+    'coverage/',
+    'public/mockServiceWorker.js',
+  ]),
   {
     files: ['**/*.{js,ts,tsx}'],
     plugins: {
@@ -30,9 +39,13 @@ export default defineConfig([
       'react/react-in-jsx-scope': 'off',
     },
   },
-  eslintPlgReactHooks.configs.flat.recommended,
+  {
+    files: ['app/**/*.{tsx}'],
+    ...eslintPlgReactHooks.configs.flat.recommended,
+  },
   tseslint.configs.recommended,
   eslintPlgStorybook.configs['flat/recommended'],
+  ...eslintPlgQuery.configs['flat/recommended'],
   {
     plugins: {
       'unused-imports': eslintPlgUnusedImports,
