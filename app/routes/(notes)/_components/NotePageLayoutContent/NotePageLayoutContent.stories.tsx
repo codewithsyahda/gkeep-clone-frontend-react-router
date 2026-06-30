@@ -103,7 +103,7 @@ export const Default: Story = {
         ).toBeVisible();
 
         await expect(canvas.getByText('Notes App')).toBeVisible();
-        await expect(canvas.getByPlaceholderText('Search')).toBeVisible();
+        await expect(canvas.getByPlaceholderText('Search [ / ]')).toBeVisible();
 
         for (const link of ['Active', 'Archive', 'Trash']) {
           await expect(
@@ -272,7 +272,7 @@ export const NoMatchedSearchNotesResult: Story = {
     await waitFor(
       async () => {
         await userEvent.type(
-          canvas.getByPlaceholderText('Search'),
+          canvas.getByPlaceholderText('Search [ / ]'),
           'Unknown note',
         );
       },
@@ -293,7 +293,10 @@ export const MatchedSearchActiveNotesResult: Story = {
   play: async ({ canvas, userEvent }) => {
     await waitFor(
       async () => {
-        await userEvent.type(canvas.getByPlaceholderText('Search'), 'Note 3');
+        await userEvent.type(
+          canvas.getByPlaceholderText('Search [ / ]'),
+          'Note 3',
+        );
       },
       { timeout: 3000 },
     );
@@ -372,7 +375,10 @@ export const MatchedSearchArchivedNotesResult: Story = {
   play: async ({ canvas, userEvent }) => {
     await waitFor(
       async () => {
-        await userEvent.type(canvas.getByPlaceholderText('Search'), 'Note 4');
+        await userEvent.type(
+          canvas.getByPlaceholderText('Search [ / ]'),
+          'Note 4',
+        );
       },
       { timeout: 3000 },
     );
@@ -451,7 +457,10 @@ export const MatchedSearchNotesResult: Story = {
   play: async ({ canvas, userEvent }) => {
     await waitFor(
       async () => {
-        await userEvent.type(canvas.getByPlaceholderText('Search'), 'Note');
+        await userEvent.type(
+          canvas.getByPlaceholderText('Search [ / ]'),
+          'Note',
+        );
       },
       { timeout: 3000 },
     );

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { delay, http, HttpResponse } from 'msw';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { Toaster } from 'sonner';
+import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
@@ -122,5 +123,68 @@ export const EmptyNotes: Story = {
         signOutHandler,
       ],
     },
+  },
+};
+
+export const SearchNotesInputHotkeys: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await expect(canvas.getByPlaceholderText('Search [ / ]')).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await userEvent.keyboard('[Slash]');
+
+        await expect(canvas.getByPlaceholderText('Search [ / ]')).toHaveFocus();
+
+        await userEvent.keyboard('title 3');
+
+        await expect(canvas.getByPlaceholderText('Search [ / ]')).toHaveValue(
+          'title 3',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await userEvent.keyboard('[Escape]');
+
+        await expect(
+          canvas.getByPlaceholderText('Search [ / ]'),
+        ).not.toHaveFocus();
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await userEvent.click(
+          canvas.getByRole('link', {
+            name: /^Edit$/,
+          }),
+        );
+
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Update note$/,
+          }),
+        ).toBeVisible();
+
+        await expect(canvas.getByPlaceholderText('Search [ / ]')).toBeVisible();
+
+        await userEvent.keyboard('[Slash]');
+
+        await expect(
+          canvas.getByPlaceholderText('Search [ / ]'),
+        ).not.toHaveFocus();
+      },
+      { timeout: 3000 },
+    );
   },
 };

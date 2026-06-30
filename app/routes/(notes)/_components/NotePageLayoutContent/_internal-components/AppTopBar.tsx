@@ -1,12 +1,15 @@
 import { MenuIcon } from 'lucide-react';
 import type { ChangeEventHandler, MouseEventHandler, RefObject } from 'react';
 import { useEffect } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useLocation } from 'react-router';
 
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 import Typography from '@mui/material/Typography';
 import AppBrandLogo from '~/routes/_components/AppBrandLogo';
@@ -60,6 +63,44 @@ export default function AppTopBar({
       searchNotesInput.value = '';
     }
   }, [location.search, searchNotesInputRootRef]);
+
+  const theme = useTheme();
+
+  const isMdUpBreakpoint = useMediaQuery(theme.breakpoints.up('md'));
+
+  useHotkeys(
+    'Slash',
+    () => {
+      const searchNotesInputRoot = searchNotesInputRootRef.current;
+
+      if (isMdUpBreakpoint && searchNotesInputRoot && location.hash === '') {
+        (
+          searchNotesInputRoot.querySelector(
+            '.MuiOutlinedInput-input',
+          ) as HTMLInputElement
+        ).focus();
+      }
+    },
+    { preventDefault: true },
+    [location.hash, isMdUpBreakpoint],
+  );
+
+  useHotkeys(
+    'escape',
+    () => {
+      const searchNotesInputRoot = searchNotesInputRootRef.current;
+
+      if (isMdUpBreakpoint && searchNotesInputRoot && location.hash === '') {
+        (
+          searchNotesInputRoot.querySelector(
+            '.MuiOutlinedInput-input',
+          ) as HTMLInputElement
+        ).blur();
+      }
+    },
+    { enableOnFormTags: ['input'] },
+    [location.hash, isMdUpBreakpoint],
+  );
 
   return (
     <Stack
@@ -133,7 +174,7 @@ export default function AppTopBar({
         }}
       >
         <OutlinedInput
-          placeholder="Search"
+          placeholder={isMdUpBreakpoint ? 'Search [ / ]' : 'Search'}
           ref={searchNotesInputRootRef}
           defaultValue={searchNotesQuery}
           onChange={handleSearchNotes}

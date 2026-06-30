@@ -276,6 +276,9 @@ importers:
       react-hook-form:
         specifier: ^7.71.1
         version: 7.80.0(react@19.2.3)
+      react-hotkeys-hook:
+        specifier: ^5.3.3
+        version: 5.3.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-router:
         specifier: ^7.12.0
         version: 7.12.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -4016,6 +4019,12 @@ packages:
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
+
+  react-hotkeys-hook@5.3.3:
+    resolution: {integrity: sha512-aswgyWUnE25hmhzHTfKDmKzsaSE5DJ4LKaU/o6rQSXkDd/1Bh9TfAFQbHkf6fLy11HvlYkp+cDDarGdhmCDhoQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-inspector@9.0.0:
     resolution: {integrity: sha512-w/VJucSeHxlwRa2nfM2k7YhpT1r5EtlDOClSR+L7DyQP91QMdfFEDXDs9bPYN4kzP7umFtom7L0b2GGjph4Kow==}
@@ -8486,6 +8495,11 @@ snapshots:
   react-hook-form@7.80.0(react@19.2.3):
     dependencies:
       react: 19.2.3
+
+  react-hotkeys-hook@5.3.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   react-inspector@9.0.0(react@19.2.3):
     dependencies:
