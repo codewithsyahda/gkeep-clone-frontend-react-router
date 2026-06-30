@@ -9,6 +9,7 @@ import {
   getSessionHandler,
   signOutHandler,
 } from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
+import * as ActiveNotePageStories from '../ActiveNotePage.stories';
 import {
   getEmptyNotesHandler,
   patchNoteByIdHandler,
@@ -81,3 +82,6 @@ export const EmptyNotes: Story = {
     },
   },
 };
+
+export const SearchNotesInputHotkeys: Story =
+  ActiveNotePageStories.SearchNotesInputHotkeys;
