@@ -118,6 +118,36 @@ export const Default: Story = {
   },
 };
 
+export const DefaultMobile: Story = {
+  parameters: Default.parameters,
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas }) => {
+    await waitFor(
+      async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: 'Show the sidebar',
+          }),
+        ).toBeVisible();
+
+        await expect(canvas.getByText('Notes App')).not.toBeVisible();
+        await expect(canvas.getByPlaceholderText('Search')).toBeVisible();
+
+        for (const link of ['Active', 'Archive', 'Trash']) {
+          await expect(
+            canvas.getByRole('link', {
+              name: link,
+            }),
+          ).toBeInTheDocument();
+        }
+      },
+      { timeout: 3000 },
+    );
+  },
+};
+
 export const OpenedUserMenu: Story = {
   parameters: {
     ...Default.parameters,
