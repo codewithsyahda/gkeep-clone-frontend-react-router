@@ -84,7 +84,6 @@ export default function NoteEditor({
     const range = document.createRange();
 
     range.selectNodeContents(inputTitleElem);
-    // range.collapse(false);
 
     const selection = window.getSelection();
 
@@ -129,6 +128,24 @@ export default function NoteEditor({
       inputTitleElem.removeEventListener('keydown', focusToNoteEditor);
     };
   }, [noteEditor.commands]);
+
+  useEffect(() => {
+    const inputTitleElem = inputTitleElemRef.current;
+
+    if (!inputTitleElem || disabledInputTitle) return;
+
+    inputTitleElem.focus();
+
+    const range = document.createRange();
+
+    range.selectNodeContents(inputTitleElem);
+    range.collapse(false);
+
+    const selection = window.getSelection();
+
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }, []);
 
   return (
     <Box
