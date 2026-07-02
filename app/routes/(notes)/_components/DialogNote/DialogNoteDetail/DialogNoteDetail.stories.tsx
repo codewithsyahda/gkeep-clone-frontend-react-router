@@ -8,6 +8,7 @@ import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
+import * as DialogCreateNoteStories from '../DialogCreateNote.stories';
 import DialogNoteDetailComponent from './DialogNoteDetail';
 
 const meta = {
@@ -94,6 +95,7 @@ export const ActiveNote: Story = {
       handlers: [getActiveNoteByIdHandler, patchContentNoteByIdSuccessHandler],
     },
   },
+  play: DialogCreateNoteStories.Default.play,
 };
 
 export const ShowedActiveNoteInfoSmallMobile: Story = {
@@ -387,6 +389,7 @@ export const ArchivedNote: Story = {
       ],
     },
   },
+  play: DialogCreateNoteStories.Default.play,
 };
 
 export const ShowedArchivedNoteInfoSmallMobile: Story = {
@@ -609,6 +612,15 @@ export const TrashedNote: Story = {
     msw: {
       handlers: [getTrashedNoteByIdHandler],
     },
+  },
+  play: async ({ canvas }) => {
+    await waitFor(() => {
+      expect(
+        canvas.getByRole('textbox', {
+          name: /^Title note$/,
+        }),
+      ).not.toHaveFocus();
+    });
   },
 };
 
