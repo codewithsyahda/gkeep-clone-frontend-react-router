@@ -84,7 +84,7 @@ export default function NoteEditor({
     const range = document.createRange();
 
     range.selectNodeContents(inputTitleElem);
-    // range.collapse(false);
+    range.collapse(false);
 
     const selection = window.getSelection();
 
