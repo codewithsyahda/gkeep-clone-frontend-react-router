@@ -151,7 +151,6 @@ export default function NoteEditor({
   return (
     <Box
       data-component="inputs-group-container"
-      tabIndex={0}
       ref={rootRef}
       sx={{
         flex: 1,

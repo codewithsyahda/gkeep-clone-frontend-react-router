@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Editor } from '@tiptap/react';
 import { FileX2Icon, Maximize, PanelTopCloseIcon, XIcon } from 'lucide-react';
-import { type MouseEventHandler } from 'react';
+import { useRef, type MouseEventHandler } from 'react';
 import { useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -90,11 +90,26 @@ export default function DialogNoteDetailTrashed({
     setTrue: handleOpenDialogDeleteNote,
   } = useBoolean(false);
 
+  const dialogOverlayRef = useRef<HTMLButtonElement>(null);
+
   return (
     <>
       <DialogNoteContainer
         type="detail-note"
         fullScreen={fullScreen}
+        dialogOverlayRef={dialogOverlayRef}
+        focusTrapProps={{
+          active: !isOpenDialogDeleteNote,
+          focusTrapOpts: {
+            initialFocus: () => {
+              const dialogOverlay = dialogOverlayRef.current;
+
+              if (dialogOverlay) {
+                dialogOverlay.focus();
+              }
+            },
+          },
+        }}
         onClose={handleCloseDialog}
         bodySection={
           <NoteEditor

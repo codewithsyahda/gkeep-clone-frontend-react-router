@@ -98,6 +98,103 @@ export const ActiveNote: Story = {
   play: DialogCreateNoteStories.Default.play,
 };
 
+export const ActiveNoteFocusTrap: Story = {
+  parameters: ActiveNote.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByRole('textbox', {
+            name: /^Title note$/,
+          }),
+        ).toHaveFocus();
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Update note$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('textbox', {
+            name: /^Title note$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab>9/}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Fullscreen$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Enter}');
+
+        await userEvent.keyboard('{Shift>}{Tab>10/}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Update note$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('textbox', {
+            name: /^Title note$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab>9/}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Fullscreen$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Enter}');
+
+        await userEvent.keyboard('{Shift>}{Tab>10/}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toHaveFocus();
+      },
+      { timeout: 5000 },
+    );
+  },
+};
+
 export const ShowedActiveNoteInfoSmallMobile: Story = {
   parameters: {
     ...ActiveNote.parameters,
@@ -392,6 +489,11 @@ export const ArchivedNote: Story = {
   play: DialogCreateNoteStories.Default.play,
 };
 
+export const ArchivedNoteFocusTrap: Story = {
+  parameters: ArchivedNote.parameters,
+  play: ActiveNoteFocusTrap.play,
+};
+
 export const ShowedArchivedNoteInfoSmallMobile: Story = {
   parameters: {
     ...ArchivedNote.parameters,
@@ -621,6 +723,79 @@ export const TrashedNote: Story = {
         }),
       ).not.toHaveFocus();
     });
+  },
+};
+
+export const TrashedNoteFocusTrap: Story = {
+  parameters: TrashedNote.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      () => {
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Fullscreen$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Enter}');
+
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Tab}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Fullscreen$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Enter}');
+
+        await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+        expect(
+          canvas.getByRole('button', {
+            name: /^Close dialog$/,
+          }),
+        ).toHaveFocus();
+      },
+      { timeout: 3000 },
+    );
   },
 };
 
