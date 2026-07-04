@@ -7,6 +7,9 @@ const ButtonOverlay = styled('button')(({ theme }) => ({
   left: 0,
   height: '100dvh',
   width: '100%',
+  '&:focus-visible': {
+    border: `2px solid ${theme.palette.primary.contrastText}`,
+  },
 }));
 
 export default ButtonOverlay;
