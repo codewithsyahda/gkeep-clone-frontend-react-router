@@ -1,6 +1,6 @@
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -29,7 +29,17 @@ export default function DialogNoteDetail() {
     },
   });
 
-  const handleCloseDialog = () => navigate({ hash: '' });
+  const [searchParams] = useSearchParams();
+
+  const searchNotesQuery = searchParams.get('search-notes') || '';
+
+  const handleCloseDialog = () =>
+    navigate({
+      hash: '',
+      search: searchNotesQuery
+        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
+        : '',
+    });
 
   const errorResponse = error as AxiosError | null;
 
@@ -118,7 +128,9 @@ export default function DialogNoteDetail() {
             height: '100%',
             width: '100%',
           }}
-        />
+        >
+          <span className="sr-only">Close dialog</span>
+        </ButtonOverlay>
       </Stack>
     );
   }
