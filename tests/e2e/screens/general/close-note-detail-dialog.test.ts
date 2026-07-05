@@ -106,7 +106,7 @@ test(`should retain the search notes param if it exists`, async ({
       }),
     );
 
-    expect(page).toHaveURL(expected);
+    await expect(page).toHaveURL(expected);
 
     await page.goto(initialUrl);
 
@@ -128,6 +128,6 @@ test(`should retain the search notes param if it exists`, async ({
         });
     }
 
-    expect(page).toHaveURL(expected);
+    await expect(page).toHaveURL(expected);
   }
 });
