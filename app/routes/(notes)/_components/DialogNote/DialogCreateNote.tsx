@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Editor, useEditor } from '@tiptap/react';
 import { clsx } from 'clsx';
 import { Maximize, SaveIcon, XIcon } from 'lucide-react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -62,6 +63,11 @@ function DialogCreateNoteEditor({
       });
     }
   };
+
+  useHotkeys('escape', handleCloseDialog, {
+    enableOnFormTags: ['textbox'],
+    enableOnContentEditable: true,
+  });
 
   return (
     <DialogNoteEditor
