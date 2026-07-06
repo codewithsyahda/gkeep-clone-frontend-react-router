@@ -999,3 +999,38 @@ export const ServerError: Story = {
     });
   },
 };
+
+export const FocusTrapNonExistentNote: Story = {
+  parameters: NotFoundError.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Dismiss',
+        }),
+      ).toBeVisible();
+
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Close dialog$/,
+        }),
+      ).toHaveFocus();
+
+      await userEvent.keyboard('{Shift>}{Tab}{/Shift}');
+
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Dismiss',
+        }),
+      ).toHaveFocus();
+
+      await userEvent.keyboard('{Tab}');
+
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Close dialog$/,
+        }),
+      ).toHaveFocus();
+    });
+  },
+};
