@@ -98,6 +98,41 @@ export const Default: Story = {
   },
 };
 
+export const CloseWithEscKey: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.click(
+          canvas.getByRole('link', {
+            name: /^Create$/,
+          }),
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        expect(
+          canvas.getByRole('textbox', {
+            name: /^Title note$/,
+          }),
+        ).toHaveFocus();
+
+        await userEvent.keyboard('{Escape}');
+
+        expect(
+          canvas.queryByRole('textbox', {
+            name: /^Title note$/,
+          }),
+        ).not.toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
+  },
+};
+
 export const getEmptyNotesHandler = http.get(
   `${envConfig.api.baseUrl}/notes`,
   async () => {

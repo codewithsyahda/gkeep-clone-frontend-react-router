@@ -1,5 +1,6 @@
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -42,6 +43,11 @@ export default function DialogNoteDetail() {
     });
 
   const errorResponse = error as AxiosError | null;
+
+  useHotkeys('escape', handleCloseDialog, {
+    enableOnFormTags: ['textbox'],
+    enableOnContentEditable: true,
+  });
 
   /**
    * The useEffect code below redirects to the note page
