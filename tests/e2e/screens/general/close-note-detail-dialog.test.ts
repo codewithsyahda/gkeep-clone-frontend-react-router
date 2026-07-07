@@ -81,7 +81,6 @@ test.afterEach(async () => {
 
 test(`should retain the search notes param if it exists`, async ({
   page,
-  isMobile,
   tapOrClick,
 }) => {
   for (const { initialUrl, expected } of [
@@ -110,23 +109,19 @@ test(`should retain the search notes param if it exists`, async ({
 
     await page.goto(initialUrl);
 
-    if (isMobile) {
-      await page
-        .getByRole('button', {
-          name: /^Close dialog$/,
-        })
-        .tap({
+    await tapOrClick(
+      page.getByRole('button', {
+        name: /^Close dialog$/,
+      }),
+      {
+        tapOptions: {
           position: { x: 24, y: 24 },
-        });
-    } else {
-      await page
-        .getByRole('button', {
-          name: /^Close dialog$/,
-        })
-        .click({
+        },
+        clickOptions: {
           position: { x: 24, y: 24 },
-        });
-    }
+        },
+      },
+    );
 
     await expect(page).toHaveURL(expected);
   }

@@ -8,7 +8,7 @@ class GeneralPOM {
   ) {}
 
   protected async tapOrClick(locator: Locator) {
-    await tapOrClickFn(this.isMobile, locator);
+    await tapOrClickFn({ isMobile: this.isMobile, locator });
   }
 
   async closeSnackbar() {
