@@ -146,7 +146,7 @@ export default function NoteEditor({
 
     selection?.removeAllRanges();
     selection?.addRange(range);
-  }, []);
+  }, [disabledInputTitle]);
 
   return (
     <Box
