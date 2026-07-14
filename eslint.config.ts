@@ -40,7 +40,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/**/*.{tsx}'],
+    files: ['app/**/*.tsx'],
     ...eslintPlgReactHooks.configs.flat.recommended,
   },
   tseslint.configs.recommended,
