@@ -40,8 +40,10 @@ export default function ArchivedNoteCard({
 
   return (
     <NoteCardContainer
+      noteId={noteId}
       noteTitle={noteTitle}
       jsonContent={jsonContent}
+      noteStatus="archived"
       actionSection={
         <Stack
           direction="row"

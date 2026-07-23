@@ -16,6 +16,7 @@ import TrashedNoteCard from '../../_components/NoteCard/TrashedNoteCard';
 import useDeleteNotes from '~/hooks/react-query/notes/useDeleteNotes';
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
 import useBoolean from '~/hooks/useBoolean';
+import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 
 export default function TrashNotesPageContent() {
@@ -73,6 +74,8 @@ export default function TrashNotesPageContent() {
       });
     }
   };
+
+  const selectionNotesCtx = useSelectionNotesCtx();
 
   return (
     <>
@@ -148,40 +151,42 @@ export default function TrashNotesPageContent() {
                     ))}
                 </Grid>
               </Stack>
-              <Button
-                variant="contained"
-                onClick={() => setIsOpenDialogEmptyAll()}
-                style={{
-                  display:
-                    openNoteDetailModal ||
-                    notes.length === 0 ||
-                    isOpenDialogEmptyAll
-                      ? 'none'
-                      : undefined,
-                }}
-                startIcon={
-                  <Box
-                    component={FileX2Icon}
-                    sx={{
-                      width: 16,
-                      height: 16,
-                    }}
-                  />
-                }
-                sx={{
-                  position: 'fixed',
-                  bottom: {
-                    xs: 16,
-                    md: 20,
-                  },
-                  right: {
-                    xs: 16,
-                    md: 24,
-                  },
-                }}
-              >
-                Empty all
-              </Button>
+              {selectionNotesCtx.notes.length === 0 && (
+                <Button
+                  variant="contained"
+                  onClick={() => setIsOpenDialogEmptyAll()}
+                  style={{
+                    display:
+                      openNoteDetailModal ||
+                      notes.length === 0 ||
+                      isOpenDialogEmptyAll
+                        ? 'none'
+                        : undefined,
+                  }}
+                  startIcon={
+                    <Box
+                      component={FileX2Icon}
+                      sx={{
+                        width: 16,
+                        height: 16,
+                      }}
+                    />
+                  }
+                  sx={{
+                    position: 'fixed',
+                    bottom: {
+                      xs: 16,
+                      md: 20,
+                    },
+                    right: {
+                      xs: 16,
+                      md: 24,
+                    },
+                  }}
+                >
+                  Empty all
+                </Button>
+              )}
               <DialogConfirmation
                 title="Empty trash?"
                 content="All notes in Trash will be permanently deleted."

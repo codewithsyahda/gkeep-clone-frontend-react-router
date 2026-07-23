@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 
 import activeNotesPageFxt from 'tests/e2e/fixtures/activeNotesPageFxt';
 import archiveNotesPageFxt from 'tests/e2e/fixtures/archiveNotesPageFxt';
+import generalPageFxt from 'tests/e2e/fixtures/generalPageFxt';
 import interactionFxt from 'tests/e2e/fixtures/interactionFxt';
 import signInPageFxt from 'tests/e2e/fixtures/signInPageFxt';
 import signUpPageFxt from 'tests/e2e/fixtures/signUpPageFxt';
@@ -12,6 +13,7 @@ import { resetDBTables } from '../../helpers/database';
 
 const test = mergeTests(
   interactionFxt,
+  generalPageFxt,
   signUpPageFxt,
   signInPageFxt,
   activeNotesPageFxt,
@@ -19,144 +21,299 @@ const test = mergeTests(
   trashNotesPageFxt,
 );
 
-test.beforeEach(async ({ page, isMobile, signUpPageFxt, signInPageFxt }) => {
-  await signUpPageFxt.goTo();
-
-  const uuid = crypto.randomUUID();
-
-  const user = {
-    fullname: uuid,
-    email: `${uuid}@email.com`,
-  };
-
-  await signUpPageFxt.signUp({
-    ...user,
-    password: '12345678',
-  });
-
-  await signInPageFxt.signIn(user.email, '12345678');
-
-  const activeNotesPOM = new ActiveNotesPOM(page, isMobile);
-
-  await activeNotesPOM.createNote('First Note', 'This is a first note.');
-});
-
 test.afterEach(async () => {
   await resetDBTables();
 });
 
-test('should delete an active note from the trash via the note detail dialog', async ({
-  page,
-  tapOrClick,
-  activeNotesPageFxt,
-  trashNotesPageFxt,
-}) => {
-  await tapOrClick(
-    page.getByRole('link', {
-      name: 'Edit',
-    }),
-  );
+test.describe(() => {
+  test.beforeEach(async ({ page, isMobile, signUpPageFxt, signInPageFxt }) => {
+    await signUpPageFxt.goTo();
 
-  await tapOrClick(
-    page
-      .locator('[data-component="dialog-note-container"]')
-      .getByRole('button', { name: 'Trash' }),
-  );
+    const uuid = crypto.randomUUID();
 
-  await expect(page.getByRole('button', { name: /^Close$/ })).not.toBeVisible();
+    const user = {
+      fullname: uuid,
+      email: `${uuid}@email.com`,
+    };
 
-  await activeNotesPageFxt.goToTrashNotePage();
+    await signUpPageFxt.signUp({
+      ...user,
+      password: '12345678',
+    });
 
-  await tapOrClick(
-    page.getByRole('link', {
-      name: 'Note detail',
-    }),
-  );
+    await signInPageFxt.signIn(user.email, '12345678');
 
-  await tapOrClick(
-    page
-      .locator('[data-component="dialog-note-container"]')
-      .getByRole('button', { name: 'Delete' }),
-  );
+    const activeNotesPOM = new ActiveNotesPOM(page, isMobile);
 
-  await tapOrClick(page.getByRole('button', { name: 'Yes' }));
+    await activeNotesPOM.createNote('First Note', 'This is a first note.');
+  });
 
-  await expect(page.getByText(/^Are you sure\?$/)).not.toBeVisible();
+  test('should delete an active note from the trash via the note detail dialog', async ({
+    page,
+    tapOrClick,
+    activeNotesPageFxt,
+    trashNotesPageFxt,
+  }) => {
+    await tapOrClick(
+      page.getByRole('link', {
+        name: 'Edit',
+      }),
+    );
 
-  await expect(page.getByText(/First Note/)).not.toBeVisible();
-  await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+    await tapOrClick(
+      page
+        .locator('[data-component="dialog-note-container"]')
+        .getByRole('button', { name: 'Trash' }),
+    );
 
-  await trashNotesPageFxt.goToActiveNotePage();
+    await expect(
+      page.getByRole('button', { name: /^Close$/ }),
+    ).not.toBeVisible();
 
-  await expect(page.getByText(/First Note/)).not.toBeVisible();
-  await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+    await activeNotesPageFxt.goToTrashNotePage();
+
+    await tapOrClick(
+      page.getByRole('link', {
+        name: 'Note detail',
+      }),
+    );
+
+    await tapOrClick(
+      page
+        .locator('[data-component="dialog-note-container"]')
+        .getByRole('button', { name: 'Delete' }),
+    );
+
+    await tapOrClick(page.getByRole('button', { name: 'Yes' }));
+
+    await expect(page.getByText(/^Are you sure\?$/)).not.toBeVisible();
+
+    await expect(page.getByText(/First Note/)).not.toBeVisible();
+    await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+
+    await trashNotesPageFxt.goToActiveNotePage();
+
+    await expect(page.getByText(/First Note/)).not.toBeVisible();
+    await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+  });
+
+  test('should delete an archived note from the trash via the note detail dialog', async ({
+    page,
+    tapOrClick,
+    activeNotesPageFxt,
+    archiveNotesPageFxt,
+    trashNotesPageFxt,
+  }) => {
+    await tapOrClick(
+      page.getByRole('link', {
+        name: 'Edit',
+      }),
+    );
+
+    await tapOrClick(
+      page
+        .locator('[data-component="dialog-note-container"]')
+        .getByRole('button', { name: 'Archive' }),
+    );
+
+    await expect(
+      page.getByRole('button', { name: /^Close$/ }),
+    ).not.toBeVisible();
+
+    await activeNotesPageFxt.goToArchiveNotePage();
+
+    await tapOrClick(
+      page.getByRole('link', {
+        name: 'Edit',
+      }),
+    );
+
+    await tapOrClick(
+      page
+        .locator('[data-component="dialog-note-container"]')
+        .getByRole('button', { name: 'Trash' }),
+    );
+
+    await expect(
+      page.getByRole('button', { name: /^Close$/ }),
+    ).not.toBeVisible();
+
+    await archiveNotesPageFxt.goToTrashNotePage();
+
+    await tapOrClick(
+      page.getByRole('link', {
+        name: 'Note detail',
+      }),
+    );
+
+    await tapOrClick(
+      page
+        .locator('[data-component="dialog-note-container"]')
+        .getByRole('button', { name: 'Delete' }),
+    );
+
+    await tapOrClick(page.getByRole('button', { name: 'Yes' }));
+
+    await expect(page.getByText(/^Are you sure\?$/)).not.toBeVisible();
+
+    await expect(page.getByText(/First Note/)).not.toBeVisible();
+    await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+
+    await trashNotesPageFxt.goToArchiveNotePage();
+
+    await expect(page.getByText(/First Note/)).not.toBeVisible();
+    await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+
+    await archiveNotesPageFxt.goToActiveNotePage();
+
+    await expect(page.getByText(/First Note/)).not.toBeVisible();
+    await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+  });
 });
 
-test('should delete an archived note from the trash via the note detail dialog', async ({
-  page,
-  tapOrClick,
-  activeNotesPageFxt,
-  archiveNotesPageFxt,
-  trashNotesPageFxt,
-}) => {
-  await tapOrClick(
-    page.getByRole('link', {
-      name: 'Edit',
-    }),
+test.describe(() => {
+  test.beforeEach(
+    async ({
+      page,
+      tapOrClick,
+      generalPageFxt,
+      signUpPageFxt,
+      signInPageFxt,
+      activeNotesPageFxt,
+    }) => {
+      await signUpPageFxt.goTo();
+
+      const uuid = crypto.randomUUID();
+
+      const user = {
+        fullname: uuid,
+        email: `${uuid}@email.com`,
+      };
+
+      await signUpPageFxt.signUp({
+        ...user,
+        password: '12345678',
+      });
+
+      await signInPageFxt.signIn(user.email, '12345678');
+
+      await activeNotesPageFxt.createNote('Note Title 1', 'This is a note 1.');
+      await activeNotesPageFxt.createNote('Note Title 2', 'This is a note 2.');
+
+      await tapOrClick(page.getByRole('button', { name: /^Trash$/ }).first());
+
+      await generalPageFxt.closeSnackbar();
+
+      await expect(page.getByRole('button', { name: /^Trash$/ })).toHaveCount(
+        1,
+      );
+
+      await tapOrClick(page.getByRole('button', { name: /^Trash$/ }));
+
+      await generalPageFxt.closeSnackbar();
+
+      await activeNotesPageFxt.createNote('Note Title 3', 'This is a note 3.');
+      await activeNotesPageFxt.createNote('Note Title 4', 'This is a note 4.');
+
+      await tapOrClick(page.getByRole('button', { name: /^Archive/ }).first());
+
+      await generalPageFxt.closeSnackbar();
+
+      await expect(page.getByRole('button', { name: /^Archive$/ })).toHaveCount(
+        1,
+      );
+
+      await tapOrClick(page.getByRole('button', { name: /^Archive$/ }));
+
+      await generalPageFxt.closeSnackbar();
+
+      await activeNotesPageFxt.createNote('Note Title 5', 'This is a note 5.');
+      await activeNotesPageFxt.createNote('Note Title 6', 'This is a note 6.');
+    },
   );
 
-  await tapOrClick(
-    page
-      .locator('[data-component="dialog-note-container"]')
-      .getByRole('button', { name: 'Archive' }),
-  );
+  [
+    {
+      subsequentSelect: 'checkbox' as const,
+    },
+    {
+      subsequentSelect: 'button' as const,
+    },
+  ].forEach(({ subsequentSelect }) => {
+    test(`should delete selected trashed notes with ${subsequentSelect} subsequent select`, async ({
+      page,
+      tapOrClick,
+      activeNotesPageFxt,
+      archiveNotesPageFxt,
+      trashNotesPageFxt,
+    }) => {
+      await activeNotesPageFxt.goToTrashNotePage();
 
-  await expect(page.getByRole('button', { name: /^Close$/ })).not.toBeVisible();
+      await tapOrClick(
+        page
+          .getByRole('checkbox', {
+            name: 'Select note',
+          })
+          .nth(0),
+      );
 
-  await activeNotesPageFxt.goToArchiveNotePage();
+      await expect(page.getByText(/^1 selected$/)).toBeVisible();
 
-  await tapOrClick(
-    page.getByRole('link', {
-      name: 'Edit',
-    }),
-  );
+      await tapOrClick(
+        page
+          .getByRole(subsequentSelect, {
+            name: 'Select note',
+          })
+          .nth(1),
+      );
 
-  await tapOrClick(
-    page
-      .locator('[data-component="dialog-note-container"]')
-      .getByRole('button', { name: 'Trash' }),
-  );
+      await expect(page.getByText(/^2 selected$/)).toBeVisible();
 
-  await expect(page.getByRole('button', { name: /^Close$/ })).not.toBeVisible();
+      await tapOrClick(
+        page.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
 
-  await archiveNotesPageFxt.goToTrashNotePage();
+      await tapOrClick(
+        page.getByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      );
 
-  await tapOrClick(
-    page.getByRole('link', {
-      name: 'Note detail',
-    }),
-  );
+      await tapOrClick(
+        page.getByRole('button', {
+          name: 'Yes',
+        }),
+      );
 
-  await tapOrClick(
-    page
-      .locator('[data-component="dialog-note-container"]')
-      .getByRole('button', { name: 'Delete' }),
-  );
+      await expect(page.getByText(/^Are you sure\?$/)).not.toBeVisible();
 
-  await tapOrClick(page.getByRole('button', { name: 'Yes' }));
+      await expect(page.getByText(/^2 notes deleted$/)).toBeVisible();
 
-  await expect(page.getByText(/^Are you sure\?$/)).not.toBeVisible();
+      await trashNotesPageFxt.goToActiveNotePage();
 
-  await expect(page.getByText(/First Note/)).not.toBeVisible();
-  await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+      await expect(page.getByText(/^Note Title 2$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 2\.$/)).not.toBeVisible();
 
-  await trashNotesPageFxt.goToArchiveNotePage();
+      await expect(page.getByText(/^Note Title 1$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 1\.$/)).not.toBeVisible();
 
-  await expect(page.getByText(/First Note/)).not.toBeVisible();
-  await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+      await activeNotesPageFxt.goToArchiveNotePage();
 
-  await archiveNotesPageFxt.goToActiveNotePage();
+      await expect(page.getByText(/^Note Title 2$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 2\.$/)).not.toBeVisible();
 
-  await expect(page.getByText(/First Note/)).not.toBeVisible();
-  await expect(page.getByText(/This is a first note./)).not.toBeVisible();
+      await expect(page.getByText(/^Note Title 1$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 1\.$/)).not.toBeVisible();
+
+      await archiveNotesPageFxt.goToTrashNotePage();
+
+      await expect(page.getByText(/^Note Title 2$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 2\.$/)).not.toBeVisible();
+
+      await expect(page.getByText(/^Note Title 1$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 1\.$/)).not.toBeVisible();
+    });
+  });
 });

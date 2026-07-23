@@ -9,6 +9,7 @@ import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
+import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import * as ActiveNoteCardStories from './ActiveNoteCard.stories';
 import { patchNoteSuccessByIdHandler } from './ActiveNoteCard.stories';
 import TrashedNoteCardComponent from './TrashedNoteCard';
@@ -42,9 +43,11 @@ const meta = {
     (Story) => {
       return (
         <>
-          <div className="min-w-sm">
-            <Story />
-          </div>
+          <SelectionNotesCtxProvider>
+            <div className="min-w-70 md:min-w-sm">
+              <Story />
+            </div>
+          </SelectionNotesCtxProvider>
           <Toaster duration={Infinity} />
         </>
       );
@@ -66,6 +69,328 @@ const args = {
 
 export const Default: Story = {
   ...ActiveNoteCardStories.Default,
+};
+
+export const NoteSelectedMobile: Story = {
+  args,
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA>]',
+        target: canvas.getByText(/^Note Title 1$/),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Info',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer('[/TouchA]');
+    });
+  },
+};
+
+export const NoteSelectionMobile: Story = {
+  args,
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA>]',
+        target: canvas.getByText(/^Note Title 1$/),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Info',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Restore',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Delete',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('link', {
+          name: 'Note detail',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer('[/TouchA]');
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByText(/^Note Title 1$/),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Info',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Restore',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Delete',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('link', {
+          name: 'Note detail',
+        }),
+      ).toBeVisible();
+    });
+  },
+};
+
+export const NoteSelectedDesktop: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('checkbox', { name: /^Select note$/ }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Info',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Restore',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Delete',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('link', {
+          name: 'Note detail',
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const NoteSelectionDesktop: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('checkbox', { name: /^Select note$/ }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Info',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Restore',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Delete',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('link', {
+          name: 'Note detail',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('checkbox', { name: /^Select note$/ }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Info',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Restore',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Delete',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('link', {
+          name: 'Note detail',
+        }),
+      ).toBeVisible();
+    });
+  },
+};
+
+export const NoteUnselectionWithNoteCardDesktop: Story = {
+  args,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('checkbox', { name: /^Select note$/ }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Info',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Restore',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: 'Delete',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('link', {
+          name: 'Note detail',
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', { name: /^Select note$/ }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Info',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Restore',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: 'Delete',
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('link', {
+          name: 'Note detail',
+        }),
+      ).toBeVisible();
+    });
+  },
 };
 
 export const ShowedNoteInfo: Story = {

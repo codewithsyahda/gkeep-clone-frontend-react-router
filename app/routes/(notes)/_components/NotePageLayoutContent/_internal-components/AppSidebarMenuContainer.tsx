@@ -9,6 +9,8 @@ import ButtonOverlay from '~/components/ButtonOverlay';
 import SidebarLink from './SidebarLink';
 import SidebarLinkItem from './SidebarLinkItem';
 
+import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+
 const sidebarLinks = [
   {
     to: '/',
@@ -36,6 +38,8 @@ export default function AppSidebarMenuContainer({
 }>) {
   const muiTheme = useTheme();
 
+  const selectionNotesCtx = useSelectionNotesCtx();
+
   useEffect(() => {
     const closeSidebarPageMobileNavigation = (ev: PointerEvent) => {
       const evTarget = ev.target as HTMLElement;
@@ -43,8 +47,16 @@ export default function AppSidebarMenuContainer({
       const isMobile =
         document.documentElement.clientWidth <= muiTheme.breakpoints.values.md;
 
-      if (evTarget.closest('[data-component="app-sidebar-link"]') && isMobile) {
+      const appSidebarLinkElem = evTarget.closest(
+        '[data-component="app-sidebar-link"]',
+      );
+
+      if (appSidebarLinkElem && isMobile) {
         closeSidebar();
+      }
+
+      if (appSidebarLinkElem && selectionNotesCtx.notes.length) {
+        selectionNotesCtx.unselectAll();
       }
     };
 
@@ -53,7 +65,7 @@ export default function AppSidebarMenuContainer({
     return () => {
       document.removeEventListener('click', closeSidebarPageMobileNavigation);
     };
-  }, [closeSidebar, muiTheme.breakpoints.values.md]);
+  }, [closeSidebar, muiTheme.breakpoints.values.md, selectionNotesCtx]);
 
   return (
     <Box

@@ -35,8 +35,10 @@ export default function ActiveNoteCard({
 
   return (
     <NoteCardContainer
+      noteId={noteId}
       noteTitle={noteTitle}
       jsonContent={jsonContent}
+      noteStatus="active"
       actionSection={
         <Stack
           direction="row"

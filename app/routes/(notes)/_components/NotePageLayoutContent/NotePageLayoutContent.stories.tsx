@@ -5,10 +5,12 @@ import {
   reactRouterParameters,
   withRouter,
 } from 'storybook-addon-remix-react-router';
-import { expect, waitFor } from 'storybook/test';
+import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
+import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
+import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
 import NotePageLayoutContent from './NotePageLayoutContent';
 
@@ -29,7 +31,9 @@ const meta = {
     (Story) => (
       <>
         <div className="-m-4 w-screen">
-          <Story />
+          <SelectionNotesCtxProvider>
+            <Story />
+          </SelectionNotesCtxProvider>
         </div>
         <Toaster duration={Infinity} />
       </>
@@ -79,6 +83,28 @@ export const getSessionHandler = http.get(
   },
 );
 
+const postNoteHandler = http.post(
+  `${envConfig.api.baseUrl}/notes`,
+  async () => {
+    await delay('real');
+    return HttpResponse.json(null, { status: 201 });
+  },
+);
+
+const putNoteByIdHandler = http.put<{
+  noteId: string;
+}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
+  await delay('real');
+  return HttpResponse.json(null);
+});
+
+const patchNoteByIdHandler = http.patch<{
+  noteId: string;
+}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
+  await delay('real');
+  return HttpResponse.json(null);
+});
+
 export const signOutHandler = http.post(
   `${envConfig.api.baseUrl}/auth/sign-out`,
   async () => {
@@ -90,7 +116,15 @@ export const signOutHandler = http.post(
 export const Default: Story = {
   parameters: {
     msw: {
-      handlers: [getSessionHandler, getNotesHandler, signOutHandler],
+      handlers: [
+        getSessionHandler,
+        getNotesHandler,
+        postNoteHandler,
+        getNoteByIdHandler,
+        putNoteByIdHandler,
+        patchNoteByIdHandler,
+        signOutHandler,
+      ],
     },
   },
   play: async ({ canvas }) => {
@@ -709,5 +743,2679 @@ export const SignedOut: Story = {
       },
       { timeout: 3000 },
     );
+  },
+};
+
+export const AllSearchedNotesSelectionMobile: Story = {
+  parameters: Default.parameters,
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const [idx, { noteContent, totalSelection }] of [
+      {
+        noteContent: /^Note Title 3$/,
+        totalSelection: /^1 selected$/,
+      },
+      {
+        noteContent: /^Note Title 2$/,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteContent: /^Note Title 1$/,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteContent: /^Note Title* 5$/,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteContent: /^Note Title 4$/,
+        totalSelection: /^5 selected$/,
+      },
+    ].entries()) {
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+          target: canvas.getByText(noteContent),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+
+        if (idx === 0) {
+          await waitFor(async () => {
+            await userEvent.pointer('[/TouchA]');
+          });
+        }
+      });
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          screen.getByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).toBeVisible();
+
+        await expect(
+          screen.getByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).toBeVisible();
+
+        await expect(
+          screen.getByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).toBeVisible();
+      });
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: screen.getByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedUnselectNoteSelectionMobile: Story = {
+  ...AllSearchedNotesSelectionMobile,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const [idx, { noteContent, totalSelection }] of [
+      {
+        noteContent: /^Note Title 3$/,
+        totalSelection: /^1 selected$/,
+      },
+      {
+        noteContent: /^Note Title 2$/,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteContent: /^Note Title 1$/,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteContent: /^Note Title* 5$/,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteContent: /^Note Title 4$/,
+        totalSelection: /^5 selected$/,
+      },
+    ].entries()) {
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+          target: canvas.getByText(noteContent),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+
+      if (idx === 0) {
+        await waitFor(async () => {
+          await userEvent.pointer('[/TouchA]');
+        });
+      }
+    }
+
+    for (const { noteContent, totalSelection } of [
+      {
+        noteContent: /^Note Title 4$/,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteContent: /^Note Title* 5$/,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteContent: /^Note Title 1$/,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteContent: /^Note Title 2$/,
+        totalSelection: /^1 selected$/,
+      },
+    ]) {
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByText(noteContent),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByText(/^Note Title 3$/),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(canvas.queryByText(/^\d selected$/)).not.toBeInTheDocument();
+
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Show the sidebar$/,
+      }),
+    ).toBeVisible();
+
+    await expect(canvas.getByPlaceholderText(/^Search$/)).toBeVisible();
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Open user menu$/,
+      }),
+    ).toBeVisible();
+  },
+};
+
+export const AllSearchedClearAllNotesSelectionMobile: Story = {
+  ...AllSearchedNotesSelectionMobile,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, totalSelection } of [
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            currentTotalSelection: /^1 selected$/,
+          },
+        ],
+        totalSelection: /^1 selected$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            currentTotalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            currentTotalSelection: /^2 selected$/,
+          },
+        ],
+        totalSelection: /^2 selected$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            currentTotalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            currentTotalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            currentTotalSelection: /^3 selected$/,
+          },
+        ],
+        totalSelection: /^3 selected$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            currentTotalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            currentTotalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            currentTotalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            currentTotalSelection: /^4 selected$/,
+          },
+        ],
+        totalSelection: /^4 selected$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            currentTotalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            currentTotalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            currentTotalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            currentTotalSelection: /^4 selected$/,
+          },
+          {
+            noteContent: /^Note Title 4$/,
+            currentTotalSelection: /^5 selected$/,
+          },
+        ],
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      for (const [
+        idx,
+        { noteContent, currentTotalSelection },
+      ] of notesSelection.entries()) {
+        await waitFor(async () => {
+          await userEvent.pointer({
+            keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+            target: canvas.getByText(noteContent),
+          });
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(currentTotalSelection)).toBeVisible();
+        });
+
+        if (idx === 0) {
+          await waitFor(async () => {
+            await userEvent.pointer('[/TouchA]');
+          });
+        }
+      }
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await expect(
+          canvas.queryByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          canvas.queryByText(totalSelection),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          canvas.queryByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedArchiveNotesSelectionMobile: Story = {
+  ...AllSearchedNotesSelectionMobile,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes archived$/,
+      },
+    ]) {
+      for (const [
+        idx,
+        { noteContent, totalSelection },
+      ] of notesSelection.entries()) {
+        await waitFor(async () => {
+          await userEvent.pointer({
+            keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+            target: canvas.getByText(noteContent),
+          });
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+
+        if (idx === 0) {
+          await waitFor(async () => {
+            await userEvent.pointer('[/TouchA]');
+          });
+        }
+      }
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: screen.getByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        });
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedUnarchiveNotesSelectionMobile: Story = {
+  ...AllSearchedNotesSelectionMobile,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes unarchive$/,
+      },
+    ]) {
+      for (const [
+        idx,
+        { noteContent, totalSelection },
+      ] of notesSelection.entries()) {
+        await waitFor(async () => {
+          await userEvent.pointer({
+            keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+            target: canvas.getByText(noteContent),
+          });
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+
+        if (idx === 0) {
+          await waitFor(async () => {
+            await userEvent.pointer('[/TouchA]');
+          });
+        }
+      }
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: screen.getByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        });
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const SearchedTrashNotesSelectionMobile: Story = {
+  ...AllSearchedNotesSelectionMobile,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(canvas.getByPlaceholderText(/^Search$/), 'note');
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteContent: /^Note Title 3$/,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteContent: /^Note Title 2$/,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteContent: /^Note Title 1$/,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteContent: /^Note Title* 5$/,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteContent: /^Note Title 4$/,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes trashed$/,
+      },
+    ]) {
+      for (const [
+        idx,
+        { noteContent, totalSelection },
+      ] of notesSelection.entries()) {
+        await waitFor(async () => {
+          await userEvent.pointer({
+            keys: idx === 0 ? '[TouchA>]' : '[TouchA]',
+            target: canvas.getByText(noteContent),
+          });
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+
+        if (idx === 0) {
+          await waitFor(async () => {
+            await userEvent.pointer('[/TouchA]');
+          });
+        }
+      }
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        });
+      });
+
+      await waitFor(async () => {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: screen.getByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        });
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedNotesSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { noteCheckboxNth, totalSelection } of [
+      {
+        noteCheckboxNth: 4,
+        totalSelection: /^1 selected$/,
+      },
+      {
+        noteCheckboxNth: 3,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCheckboxNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCheckboxNth: 1,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCheckboxNth: 0,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[noteCheckboxNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const AllSearchedUnselectNoteSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { noteCheckboxNth, totalSelection } of [
+      {
+        noteCheckboxNth: 0,
+        totalSelection: /^1 selected$/,
+      },
+      {
+        noteCheckboxNth: 1,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCheckboxNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCheckboxNth: 3,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCheckboxNth: 4,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[noteCheckboxNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    for (const { noteCheckboxNth, totalSelection } of [
+      {
+        noteCheckboxNth: 4,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCheckboxNth: 3,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCheckboxNth: 2,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCheckboxNth: 1,
+        totalSelection: /^1 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[noteCheckboxNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await userEvent.click(
+      canvas.getAllByRole('checkbox', {
+        name: /^Select note$/,
+      })[0],
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(canvas.queryByText(/^\d selected$/)).not.toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Minimize the sidebar$/,
+      }),
+    ).toBeVisible();
+
+    await expect(canvas.getByText(/^Notes App$/)).toBeVisible();
+
+    await expect(
+      canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+    ).toBeVisible();
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Open user menu$/,
+      }),
+    ).toBeVisible();
+  },
+};
+
+export const AllSearchedClearAllNotesSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { noteCheckboxNth, totalSelection } of [
+      {
+        noteCheckboxNth: 0,
+        totalSelection: /^1 selected$/,
+      },
+      {
+        noteCheckboxNth: 1,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCheckboxNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCheckboxNth: 3,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCheckboxNth: 4,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[noteCheckboxNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: /^Clear all selection$/,
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(canvas.queryByText(/^\d selected$/)).not.toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Minimize the sidebar$/,
+      }),
+    ).toBeVisible();
+
+    await expect(canvas.getByText(/^Notes App$/)).toBeVisible();
+
+    await expect(
+      canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+    ).toBeVisible();
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Open user menu$/,
+      }),
+    ).toBeVisible();
+  },
+};
+
+export const AllSearchedArchiveNotesSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes archived$/,
+      },
+    ]) {
+      for (const { noteCheckboxNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('checkbox', {
+              name: /^Select note$/,
+            })[noteCheckboxNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedUnarchiveNotesSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes unarchive$/,
+      },
+    ]) {
+      for (const { noteCheckboxNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('checkbox', {
+              name: /^Select note$/,
+            })[noteCheckboxNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedTrashNotesSelectionDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+        ],
+        toastMessage: /^Note trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCheckboxNth: 0,
+            totalSelection: /^1 selected$/,
+          },
+          {
+            noteCheckboxNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCheckboxNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCheckboxNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCheckboxNth: 4,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes trashed$/,
+      },
+    ]) {
+      for (const { noteCheckboxNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('checkbox', {
+              name: /^Select note$/,
+            })[noteCheckboxNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedNotesSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    await userEvent.click(
+      canvas.getAllByRole('checkbox', {
+        name: /^Select note$/,
+      })[0],
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeInTheDocument();
+    });
+
+    await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+
+    for (const { noteCardSelectionNth, totalSelection } of [
+      {
+        noteCardSelectionNth: 1,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCardSelectionNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCardSelectionNth: 3,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCardSelectionNth: 4,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('button', {
+          name: /^Select note$/,
+        })[noteCardSelectionNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const AllSearchedUnselectNoteSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    await userEvent.click(
+      canvas.getAllByRole('checkbox', {
+        name: /^Select note$/,
+      })[0],
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeInTheDocument();
+    });
+
+    await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+
+    for (const { noteCardSelectionNth, totalSelection } of [
+      {
+        noteCardSelectionNth: 1,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCardSelectionNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCardSelectionNth: 3,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCardSelectionNth: 4,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('button', {
+          name: /^Select note$/,
+        })[noteCardSelectionNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    for (const { noteCardSelectionNth, totalSelection } of [
+      {
+        noteCardSelectionNth: 4,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCardSelectionNth: 3,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCardSelectionNth: 2,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCardSelectionNth: 1,
+        totalSelection: /^1 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('button', {
+          name: /^Select note$/,
+        })[noteCardSelectionNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await userEvent.click(
+      canvas.getAllByRole('button', {
+        name: /^Select note$/,
+      })[0],
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(canvas.queryByText(/^\d selected$/)).not.toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Minimize the sidebar$/,
+      }),
+    ).toBeVisible();
+
+    await expect(canvas.getByText(/^Notes App$/)).toBeVisible();
+
+    await expect(
+      canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+    ).toBeVisible();
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Open user menu$/,
+      }),
+    ).toBeVisible();
+  },
+};
+
+export const AllSearchedClearAllNotesSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    await userEvent.click(
+      canvas.getAllByRole('checkbox', {
+        name: /^Select note$/,
+      })[0],
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeInTheDocument();
+
+      await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+    });
+
+    for (const { noteCardSelectionNth, totalSelection } of [
+      {
+        noteCardSelectionNth: 1,
+        totalSelection: /^2 selected$/,
+      },
+      {
+        noteCardSelectionNth: 2,
+        totalSelection: /^3 selected$/,
+      },
+      {
+        noteCardSelectionNth: 3,
+        totalSelection: /^4 selected$/,
+      },
+      {
+        noteCardSelectionNth: 4,
+        totalSelection: /^5 selected$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('button', {
+          name: /^Select note$/,
+        })[noteCardSelectionNth],
+      );
+
+      await waitFor(async () => {
+        await expect(
+          canvas.getByRole('button', {
+            name: /^Clear all selection$/,
+          }),
+        ).toBeInTheDocument();
+
+        await expect(canvas.getByText(totalSelection)).toBeVisible();
+      });
+    }
+
+    await userEvent.click(
+      canvas.getByRole('button', {
+        name: /^Clear all selection$/,
+      }),
+    );
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(canvas.queryByText(/^\d selected$/)).not.toBeInTheDocument();
+    });
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Minimize the sidebar$/,
+      }),
+    ).toBeVisible();
+
+    await expect(canvas.getByText(/^Notes App$/)).toBeVisible();
+
+    await expect(
+      canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+    ).toBeVisible();
+
+    await expect(
+      canvas.getByRole('button', {
+        name: /^Open user menu$/,
+      }),
+    ).toBeVisible();
+  },
+};
+
+export const AllSearchedArchiveNotesSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes archived$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCardSelectionNth: 4,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes archived$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[0],
+      );
+
+      await waitFor(async () => {
+        await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+      });
+
+      for (const { noteCardSelectionNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('button', {
+              name: /^Select note$/,
+            })[noteCardSelectionNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedUnarchiveNotesSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes unarchive$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCardSelectionNth: 0,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes unarchive$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[4],
+      );
+
+      await waitFor(async () => {
+        await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+      });
+
+      for (const { noteCardSelectionNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('button', {
+              name: /^Select note$/,
+            })[noteCardSelectionNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
+  },
+};
+
+export const AllSearchedTrashNotesSelectionByNoteCardDesktop: Story = {
+  parameters: Default.parameters,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(
+      async () => {
+        await userEvent.type(
+          canvas.getByPlaceholderText(/^Search \[ \/ \]$/),
+          'note',
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    await waitFor(
+      async () => {
+        await expect(canvas.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(canvas.getByText(/^Archived Notes$/)).toBeVisible();
+      },
+      { timeout: 3000 },
+    );
+
+    for (const { notesSelection, toastMessage } of [
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+        ],
+        toastMessage: /^2 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+        ],
+        toastMessage: /^3 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+        ],
+        toastMessage: /^4 notes trashed$/,
+      },
+      {
+        notesSelection: [
+          {
+            noteCardSelectionNth: 1,
+            totalSelection: /^2 selected$/,
+          },
+          {
+            noteCardSelectionNth: 2,
+            totalSelection: /^3 selected$/,
+          },
+          {
+            noteCardSelectionNth: 3,
+            totalSelection: /^4 selected$/,
+          },
+          {
+            noteCardSelectionNth: 4,
+            totalSelection: /^5 selected$/,
+          },
+        ],
+        toastMessage: /^5 notes trashed$/,
+      },
+    ]) {
+      await userEvent.click(
+        canvas.getAllByRole('checkbox', {
+          name: /^Select note$/,
+        })[0],
+      );
+
+      await waitFor(async () => {
+        await expect(canvas.getByText(/^1 selected$/)).toBeVisible();
+      });
+
+      for (const { noteCardSelectionNth, totalSelection } of notesSelection) {
+        await waitFor(async () => {
+          await userEvent.click(
+            canvas.getAllByRole('button', {
+              name: /^Select note$/,
+            })[noteCardSelectionNth],
+          );
+        });
+
+        await waitFor(async () => {
+          await expect(canvas.getByText(totalSelection)).toBeVisible();
+        });
+      }
+
+      await waitFor(async () => {
+        await userEvent.click(
+          canvas.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+      });
+
+      await waitFor(async () => {
+        await userEvent.click(
+          screen.getByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        );
+      });
+
+      await waitFor(
+        async () => {
+          await expect(canvas.getByText(toastMessage)).toBeVisible();
+        },
+        { timeout: 3000 },
+      );
+
+      await waitFor(async () => {
+        await expect(
+          screen.queryByRole('button', {
+            name: /^Close selection actions menu$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Archive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Unarchive$/,
+          }),
+        ).not.toBeInTheDocument();
+
+        await expect(
+          screen.queryByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        ).not.toBeInTheDocument();
+      });
+    }
   },
 };
