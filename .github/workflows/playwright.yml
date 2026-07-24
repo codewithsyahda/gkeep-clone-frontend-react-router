@@ -114,3 +114,51 @@ jobs:
         run: cd frontend && pnpm exec playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
         env:
           E2E_API_HELPER_BASE_URL: http://localhost:5010/api
+
+      - name: Upload Playwright blob report to GAs Artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-blob-report-${{ matrix.shardIndex }}
+          path: playwright-blob-report
+          retention-days: 1
+
+  merge_reports:
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    needs: [playwright_test]
+
+    steps:
+      - name: Checkout frontend repo
+        uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.11.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Download Playwright blob reports from GAs Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: all-playwright-blob-reports
+          pattern: playwright-blob-report-*
+          merge-multiple: true
+
+      - name: Merge all Playwright reports into HTML report
+        run: pnpm exec playwright merge-reports --reporter html ./all-playwright-blob-reports
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-html-report--attempt-${{ github.run_attempt }}
+          path: playwright-report
+          retention-days: 14
