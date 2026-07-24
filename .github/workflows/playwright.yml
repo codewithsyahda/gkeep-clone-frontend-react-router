@@ -12,6 +12,11 @@ jobs:
   playwright_test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8]
+        shardTotal: [8]
     environment: CI
 
     services:
@@ -106,6 +111,6 @@ jobs:
           VITE_API_BASE_URL: http://localhost:5000/api/v1
 
       - name: Run Playwright tests
-        run: cd frontend && pnpm exec playwright test
+        run: cd frontend && pnpm exec playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
         env:
           E2E_API_HELPER_BASE_URL: http://localhost:5010/api
