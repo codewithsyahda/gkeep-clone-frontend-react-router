@@ -79,6 +79,7 @@ export default function TrashedNoteCard({
   return (
     <>
       <NoteCardContainer
+        noteId={noteId}
         noteTitle={noteTitle}
         jsonContent={jsonContent}
         actionSection={
@@ -153,6 +154,7 @@ export default function TrashedNoteCard({
             </Tooltip>
           </Stack>
         }
+        isTrashed
       />
       <DialogConfirmation
         title="Are you sure?"

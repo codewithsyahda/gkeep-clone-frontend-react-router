@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router';
 
 import Box from '@mui/material/Box';
@@ -11,6 +12,7 @@ import ActiveNoteCard from '../../NoteCard/ActiveNoteCard';
 import ArchivedNoteCard from '../../NoteCard/ArchivedNoteCard';
 
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
+import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 
 export default function AppSidebarContentContainer({
   searchNotesQuery,
@@ -38,8 +40,36 @@ export default function AppSidebarContentContainer({
   const searchedNotesEmpty =
     searchedActiveNotes?.length === 0 && searchedArchivedNotes?.length === 0;
 
+  const selectionNotesCtx = useSelectionNotesCtx();
+
+  const appSidebarContentContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const appSidebarContentContainer = appSidebarContentContainerRef.current;
+
+    if (!appSidebarContentContainer) return;
+
+    const handlePointerUp = (ev: PointerEvent) => {
+      const evTarget = ev.target as HTMLElement;
+
+      if (
+        evTarget.closest('[data-component="app-sidebar-content-container"]') &&
+        !evTarget.closest('[data-component="note-card-container"]')
+      ) {
+        setTimeout(() => selectionNotesCtx.unselectAll(), 100);
+      }
+    };
+
+    document.addEventListener('pointerup', handlePointerUp);
+
+    return () => {
+      document.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [selectionNotesCtx]);
+
   return (
     <Box
+      ref={appSidebarContentContainerRef}
       data-component="app-sidebar-content-container"
       sx={{
         flexBasis: '100%',

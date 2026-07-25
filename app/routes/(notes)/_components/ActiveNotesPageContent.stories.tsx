@@ -8,6 +8,7 @@ import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
+import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import { notes as notesDB } from '~/tests/mocks/apis/fakeDB/notes';
 import ActiveNotesPageContent from './ActiveNotesPageContent';
 
@@ -26,9 +27,11 @@ const meta = {
     reactQueryDecorator,
     withRouter,
     (Story) => (
-      <div className="h-[95dvh] w-[96vw]">
-        <Story />
-      </div>
+      <SelectionNotesCtxProvider>
+        <div className="h-[95dvh] w-[96vw]">
+          <Story />
+        </div>
+      </SelectionNotesCtxProvider>
     ),
   ],
   excludeStories: [

@@ -12,6 +12,7 @@ import DialogCreateNote from './../_components/DialogNote/DialogCreateNote';
 import ActiveNoteCard from './../_components/NoteCard/ActiveNoteCard';
 
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
+import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 
 export default function ActiveNotesPageContent() {
   const { isFetchedAfterMount, data } = useGetNotes({
@@ -32,6 +33,8 @@ export default function ActiveNotesPageContent() {
   const isOpenDialogCreateNote = dialogName === 'create';
 
   const notes = data?.notes.active ?? [];
+
+  const selectionNotesCtx = useSelectionNotesCtx();
 
   return (
     <>
@@ -91,37 +94,39 @@ export default function ActiveNotesPageContent() {
           )}
         </>
       )}
-      <ButtonLink
-        variant="contained"
-        to={{
-          hash: '#create',
-        }}
-        startIcon={
-          <Box
-            component={PlusIcon}
-            sx={{
-              width: 16,
-              height: 16,
-            }}
-          />
-        }
-        style={{
-          display: isOpenDialogCreateNote ? 'none' : undefined,
-        }}
-        sx={{
-          position: 'fixed',
-          bottom: {
-            xs: 16,
-            md: 20,
-          },
-          right: {
-            xs: 16,
-            md: 24,
-          },
-        }}
-      >
-        Create
-      </ButtonLink>
+      {selectionNotesCtx.notes.length === 0 && (
+        <ButtonLink
+          variant="contained"
+          to={{
+            hash: '#create',
+          }}
+          startIcon={
+            <Box
+              component={PlusIcon}
+              sx={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          }
+          style={{
+            display: isOpenDialogCreateNote ? 'none' : undefined,
+          }}
+          sx={{
+            position: 'fixed',
+            bottom: {
+              xs: 16,
+              md: 20,
+            },
+            right: {
+              xs: 16,
+              md: 24,
+            },
+          }}
+        >
+          Create
+        </ButtonLink>
+      )}
     </>
   );
 }

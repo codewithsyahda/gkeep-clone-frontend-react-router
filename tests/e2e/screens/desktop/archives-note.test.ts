@@ -77,7 +77,7 @@ test.describe(() => {
   });
 });
 
-test.describe('Archives Note After Searching Notes', () => {
+test.describe(() => {
   test.beforeEach(
     async ({
       page,
@@ -129,49 +129,346 @@ test.describe('Archives Note After Searching Notes', () => {
     },
   );
 
-  test('should archive an active note via the note detail dialog', async ({
-    page,
-    tapOrClick,
-    activeNotesPageFxt,
-    archiveNotesPageFxt,
-  }) => {
-    await activeNotesPageFxt.appTopBar.getSearchInput().fill('title 6');
+  test.describe('Archives Note After Searching Notes', () => {
+    test('should archive an active note via the note detail dialog', async ({
+      page,
+      tapOrClick,
+      activeNotesPageFxt,
+      archiveNotesPageFxt,
+    }) => {
+      await activeNotesPageFxt.appTopBar.getSearchInput().fill('title 6');
 
-    await expect(
-      page.getByRole('link', {
-        name: 'Edit',
-      }),
-    ).toHaveCount(1);
+      await expect(
+        page.getByRole('link', {
+          name: 'Edit',
+        }),
+      ).toHaveCount(1);
 
-    await tapOrClick(
-      page.getByRole('link', {
-        name: 'Edit',
-      }),
-    );
+      await tapOrClick(
+        page.getByRole('link', {
+          name: 'Edit',
+        }),
+      );
 
-    await tapOrClick(
-      page
-        .locator('[data-component="dialog-note-container"]')
-        .getByRole('button', { name: 'Archive' }),
-    );
+      await tapOrClick(
+        page
+          .locator('[data-component="dialog-note-container"]')
+          .getByRole('button', { name: 'Archive' }),
+      );
 
-    await expect(
-      page.getByRole('button', { name: /^Close$/ }),
-    ).not.toBeVisible();
+      await expect(
+        page.getByRole('button', { name: /^Close$/ }),
+      ).not.toBeVisible();
 
-    await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
-    await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
+      await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
 
-    await activeNotesPageFxt.goToArchiveNotePage();
+      await activeNotesPageFxt.goToArchiveNotePage();
 
-    await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
-    await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
+      await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
 
-    await expect(activeNotesPageFxt.appTopBar.getSearchInput()).toHaveValue('');
+      await expect(activeNotesPageFxt.appTopBar.getSearchInput()).toHaveValue(
+        '',
+      );
 
-    await archiveNotesPageFxt.goToActiveNotePage();
+      await archiveNotesPageFxt.goToActiveNotePage();
 
-    await expect(page.getByText(/^Note Title 6$/)).not.toBeVisible();
-    await expect(page.getByText(/^This is a note 6\.$/)).not.toBeVisible();
+      await expect(page.getByText(/^Note Title 6$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 6\.$/)).not.toBeVisible();
+    });
+
+    [
+      {
+        subsequentSelect: 'checkbox' as const,
+      },
+      {
+        subsequentSelect: 'button' as const,
+      },
+    ].forEach(({ subsequentSelect }) => {
+      [
+        {
+          otherSelection: [],
+          toastMessage: /^Note archived$/,
+          finalArchivePage: [
+            {
+              title: /^Note Title 6$/,
+              content: /^This is a note 6\.$/,
+            },
+            {
+              title: /^Note Title 4$/,
+              content: /^This is a note 4\.$/,
+            },
+            {
+              title: /^Note Title 3$/,
+              content: /^This is a note 3\.$/,
+            },
+          ],
+          finalActivePage: {
+            visible: [
+              {
+                title: /^Note Title 5$/,
+                content: /^This is a note 5\.$/,
+              },
+            ],
+            notVisible: [
+              {
+                title: /^Note Title 6$/,
+                content: /^This is a note 6\.$/,
+              },
+            ],
+          },
+        },
+        {
+          otherSelection: [1],
+          toastMessage: /^2 notes archived$/,
+          finalArchivePage: [
+            {
+              title: /^Note Title 6$/,
+              content: /^This is a note 6\.$/,
+            },
+            {
+              title: /^Note Title 5$/,
+              content: /^This is a note 5\.$/,
+            },
+            {
+              title: /^Note Title 4$/,
+              content: /^This is a note 4\.$/,
+            },
+            {
+              title: /^Note Title 3$/,
+              content: /^This is a note 3\.$/,
+            },
+          ],
+          finalActivePage: {
+            visible: [],
+            notVisible: [
+              {
+                title: /^Note Title 6$/,
+                content: /^This is a note 6\.$/,
+              },
+              {
+                title: /^Note Title 5$/,
+                content: /^This is a note 5\.$/,
+              },
+            ],
+          },
+        },
+        {
+          otherSelection: [1, 2],
+          toastMessage: /^3 notes archived$/,
+          finalArchivePage: [
+            {
+              title: /^Note Title 6$/,
+              content: /^This is a note 6\.$/,
+            },
+            {
+              title: /^Note Title 5$/,
+              content: /^This is a note 5\.$/,
+            },
+            {
+              title: /^Note Title 4$/,
+              content: /^This is a note 4\.$/,
+            },
+            {
+              title: /^Note Title 3$/,
+              content: /^This is a note 3\.$/,
+            },
+          ],
+          finalActivePage: {
+            visible: [],
+            notVisible: [
+              {
+                title: /^Note Title 6$/,
+                content: /^This is a note 6\.$/,
+              },
+              {
+                title: /^Note Title 5$/,
+                content: /^This is a note 5\.$/,
+              },
+            ],
+          },
+        },
+        {
+          otherSelection: [1, 2, 3],
+          toastMessage: /^4 notes archived$/,
+          finalArchivePage: [
+            {
+              title: /^Note Title 6$/,
+              content: /^This is a note 6\.$/,
+            },
+            {
+              title: /^Note Title 5$/,
+              content: /^This is a note 5\.$/,
+            },
+            {
+              title: /^Note Title 4$/,
+              content: /^This is a note 4\.$/,
+            },
+            {
+              title: /^Note Title 3$/,
+              content: /^This is a note 3\.$/,
+            },
+          ],
+          finalActivePage: {
+            visible: [],
+            notVisible: [
+              {
+                title: /^Note Title 6$/,
+                content: /^This is a note 6\.$/,
+              },
+              {
+                title: /^Note Title 5$/,
+                content: /^This is a note 5\.$/,
+              },
+            ],
+          },
+        },
+      ].forEach(
+        ({
+          otherSelection,
+          toastMessage,
+          finalArchivePage,
+          finalActivePage,
+        }) => {
+          test(`should archive ${otherSelection.length + 1} searched selected ${otherSelection.length ? 'notes' : 'note'} with ${subsequentSelect} subsequent select`, async ({
+            page,
+            tapOrClick,
+            activeNotesPageFxt,
+            archiveNotesPageFxt,
+          }) => {
+            await activeNotesPageFxt.appTopBar.getSearchInput().fill('note');
+
+            await expect(page.getByText(/^Active Notes$/)).toBeVisible();
+            await expect(page.getByText(/^Archived Notes$/)).toBeVisible();
+
+            await tapOrClick(
+              page
+                .getByRole('checkbox', {
+                  name: /^Select note$/,
+                })
+                .nth(0),
+            );
+
+            await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+            for (const otherSelectionNth of otherSelection) {
+              await tapOrClick(
+                page
+                  .getByRole(subsequentSelect, {
+                    name: 'Select note',
+                  })
+                  .nth(otherSelectionNth),
+              );
+            }
+
+            await expect(
+              page.getByText(
+                new RegExp(`^${otherSelection.length + 1} selected$`),
+              ),
+            ).toBeVisible();
+
+            await tapOrClick(
+              page.getByRole('button', {
+                name: /^Selection menu$/,
+              }),
+            );
+
+            await tapOrClick(
+              page.getByRole('menuitem', {
+                name: /^Archive$/,
+              }),
+            );
+
+            await expect(page.getByText(toastMessage)).toBeVisible();
+
+            await activeNotesPageFxt.goToArchiveNotePage();
+
+            for (const { title, content } of finalArchivePage) {
+              await expect(page.getByText(title)).toBeVisible();
+              await expect(page.getByText(content)).toBeVisible();
+            }
+
+            await archiveNotesPageFxt.goToActiveNotePage();
+
+            for (const { title, content } of finalActivePage.notVisible) {
+              await expect(page.getByText(title)).not.toBeVisible();
+              await expect(page.getByText(content)).not.toBeVisible();
+            }
+
+            for (const { title, content } of finalActivePage.visible) {
+              await expect(page.getByText(title)).toBeVisible();
+              await expect(page.getByText(content)).toBeVisible();
+            }
+          });
+        },
+      );
+    });
+  });
+
+  [
+    {
+      subsequentSelect: 'checkbox' as const,
+    },
+    {
+      subsequentSelect: 'button' as const,
+    },
+  ].forEach(({ subsequentSelect }) => {
+    test(`should archive selected active notes with ${subsequentSelect} subsequent select`, async ({
+      page,
+      tapOrClick,
+      activeNotesPageFxt,
+      archiveNotesPageFxt,
+    }) => {
+      await tapOrClick(
+        page
+          .getByRole('checkbox', {
+            name: /^Select note$/,
+          })
+          .nth(0),
+      );
+
+      await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+      await tapOrClick(
+        page
+          .getByRole(subsequentSelect, {
+            name: /^Select note$/,
+          })
+          .nth(1),
+      );
+
+      await expect(page.getByText(/^2 selected$/)).toBeVisible();
+
+      await tapOrClick(
+        page.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+
+      await tapOrClick(
+        page.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      );
+
+      await expect(page.getByText(/^2 notes archived$/)).toBeVisible();
+
+      await activeNotesPageFxt.goToArchiveNotePage();
+
+      await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
+
+      await expect(page.getByText(/^Note Title 5$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 5\.$/)).toBeVisible();
+
+      await archiveNotesPageFxt.goToActiveNotePage();
+
+      await expect(page.getByText(/^Note Title 6$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 6\.$/)).not.toBeVisible();
+
+      await expect(page.getByText(/^Note Title 5$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 5\.$/)).not.toBeVisible();
+    });
   });
 });
