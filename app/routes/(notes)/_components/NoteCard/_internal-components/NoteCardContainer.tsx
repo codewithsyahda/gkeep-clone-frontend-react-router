@@ -73,13 +73,15 @@ export default function NoteCardContainer({
     }
   };
 
-  const handleNoteSelectionPointerMove: PointerEventHandler<
-    HTMLDivElement
-  > = () => {
+  const handleNoteSelectionPointerMove: PointerEventHandler<HTMLDivElement> = (
+    ev,
+  ) => {
+    const movY = ev.movementY;
+
     if (document.documentElement.clientWidth < muiTheme.breakpoints.values.sm) {
       const selectionTm = selectionTmRef.current;
 
-      if (selectionTm) {
+      if (selectionTm && (movY < -2 || movY >= 2)) {
         clearTimeout(selectionTm);
       }
     }
@@ -142,6 +144,12 @@ export default function NoteCardContainer({
 
       if (isFirstNoteSelection) {
         isFirstNoteSelectionRef.current = false;
+      }
+
+      const selectionTm = selectionTmRef.current;
+
+      if (selectionTm) {
+        clearTimeout(selectionTm);
       }
     }
   };
