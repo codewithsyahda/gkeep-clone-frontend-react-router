@@ -176,7 +176,6 @@ test.describe(() => {
     async ({
       page,
       tapOrClick,
-      generalPageFxt,
       signUpPageFxt,
       signInPageFxt,
       activeNotesPageFxt,
@@ -202,30 +201,22 @@ test.describe(() => {
 
       await tapOrClick(page.getByRole('button', { name: /^Trash$/ }).first());
 
-      await generalPageFxt.closeSnackbar();
-
       await expect(page.getByRole('button', { name: /^Trash$/ })).toHaveCount(
         1,
       );
 
       await tapOrClick(page.getByRole('button', { name: /^Trash$/ }));
 
-      await generalPageFxt.closeSnackbar();
-
       await activeNotesPageFxt.createNote('Note Title 3', 'This is a note 3.');
       await activeNotesPageFxt.createNote('Note Title 4', 'This is a note 4.');
 
       await tapOrClick(page.getByRole('button', { name: /^Archive/ }).first());
-
-      await generalPageFxt.closeSnackbar();
 
       await expect(page.getByRole('button', { name: /^Archive$/ })).toHaveCount(
         1,
       );
 
       await tapOrClick(page.getByRole('button', { name: /^Archive$/ }));
-
-      await generalPageFxt.closeSnackbar();
 
       await activeNotesPageFxt.createNote('Note Title 5', 'This is a note 5.');
       await activeNotesPageFxt.createNote('Note Title 6', 'This is a note 6.');

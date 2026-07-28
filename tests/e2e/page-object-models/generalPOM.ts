@@ -26,9 +26,11 @@ class GeneralPOM {
 
     await expect(
       this.page.getByRole('button', { name: 'Close snackbar' }),
-    ).not.toBeVisible({
-      timeout: 15_000,
-    });
+    ).toHaveCount(0);
+
+    await expect(
+      this.page.getByRole('button', { name: 'Close snackbar' }),
+    ).not.toBeInViewport();
   }
 }
 

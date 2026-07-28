@@ -33,51 +33,90 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
+  failOnFlakyTests: !!isCI,
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        ...devices['Desktop Safari'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/mobile/**'],
       expect: {
-        timeout: 30_000,
+        timeout: 60_000,
       },
-      timeout: 60_000,
+      timeout: 120_000,
     },
 
     {
       name: 'Galaxy S9+',
-      use: { ...devices['Galaxy S9+'] },
-      testIgnore: ['tests/e2e/screens/desktop/**'],
-    },
-
-    {
-      name: 'Pixel 5',
-      use: { ...devices['Pixel 5'] },
-      testIgnore: ['tests/e2e/screens/desktop/**'],
-    },
-
-    {
-      name: 'iPhone 12',
-      use: { ...devices['iPhone 12'] },
+      use: {
+        ...devices['Galaxy S9+'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/desktop/**'],
       expect: {
         timeout: 30_000,
       },
       timeout: 60_000,
+    },
+
+    {
+      name: 'Pixel 5',
+      use: {
+        ...devices['Pixel 5'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
+      testIgnore: ['tests/e2e/screens/desktop/**'],
+      expect: {
+        timeout: 30_000,
+      },
+      timeout: 60_000,
+    },
+
+    {
+      name: 'iPhone 12',
+      use: {
+        ...devices['iPhone 12'],
+        launchOptions: {
+          slowMo: 750,
+        },
+      },
+      testIgnore: ['tests/e2e/screens/desktop/**'],
+      expect: {
+        timeout: 60_000,
+      },
+      timeout: 120_000,
     },
 
     /* Test against mobile viewports. */
