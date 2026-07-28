@@ -39,13 +39,23 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          slowMo: 500,
+        },
+      },
       testIgnore: ['tests/e2e/screens/mobile/**'],
     },
 
@@ -69,7 +79,7 @@ export default defineConfig({
       use: {
         ...devices['Galaxy S9+'],
         launchOptions: {
-          slowMo: 300,
+          slowMo: 500,
         },
       },
       testIgnore: ['tests/e2e/screens/desktop/**'],
@@ -84,7 +94,7 @@ export default defineConfig({
       use: {
         ...devices['Pixel 5'],
         launchOptions: {
-          slowMo: 300,
+          slowMo: 500,
         },
       },
       testIgnore: ['tests/e2e/screens/desktop/**'],
