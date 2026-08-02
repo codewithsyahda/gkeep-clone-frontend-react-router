@@ -15,18 +15,12 @@ export default function AppBrandLogo() {
       <Box
         sx={{
           backgroundColor: 'primary.main',
-          borderRadius: '0.5em',
+          borderRadius: 2,
           color: 'common.white',
-          p: '0.25em',
+          p: 0.5,
         }}
       >
-        <Box
-          component={GalleryVerticalEnd}
-          sx={{
-            height: '1em',
-            width: '1em',
-          }}
-        />
+        <GalleryVerticalEnd size={16} aria-hidden="true" />
       </Box>
       <Typography
         sx={{
