@@ -7,9 +7,9 @@ import {
 } from 'storybook-addon-remix-react-router';
 import { expect, screen, waitFor } from 'storybook/test';
 
+import notesSelectionDecorator from '.storybook/decorators/notesSelection';
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
 import NotePageLayoutContent from './NotePageLayoutContent';
@@ -18,27 +18,22 @@ const meta = {
   title: 'Composites/NotePageLayoutContent',
   component: NotePageLayoutContent,
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     reactRouter: reactRouterParameters({
       routing: {
         path: '/*',
       },
     }),
   },
-  decorators: [
-    reactQueryDecorator,
-    withRouter,
-    (Story) => (
+  decorators: [reactQueryDecorator, withRouter, notesSelectionDecorator],
+  render: function Render() {
+    return (
       <>
-        <div className="-m-4 w-screen">
-          <SelectionNotesCtxProvider>
-            <Story />
-          </SelectionNotesCtxProvider>
-        </div>
+        <NotePageLayoutContent />
         <Toaster duration={Infinity} />
       </>
-    ),
-  ],
+    );
+  },
   excludeStories: ['getSessionHandler', 'signOutHandler'],
 } satisfies Meta<typeof NotePageLayoutContent>;
 
@@ -80,6 +75,21 @@ export const getSessionHandler = http.get(
         },
       },
     );
+  },
+);
+
+const getEmptyNotesHandler = http.get(
+  `${envConfig.api.baseUrl}/notes`,
+  async () => {
+    return HttpResponse.json({
+      data: {
+        notes: {
+          active: [],
+          archived: [],
+          trash: [],
+        },
+      },
+    });
   },
 );
 
@@ -179,6 +189,767 @@ export const DefaultMobile: Story = {
       },
       { timeout: 3000 },
     );
+  },
+};
+
+export const ActiveNotesSelectionBar: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        getSessionHandler,
+        getEmptyNotesHandler,
+        patchNoteByIdHandler,
+        signOutHandler,
+      ],
+    },
+    notesSelection: {
+      mockedCtxValue: {
+        notes: [
+          {
+            noteId: 'id-note-1',
+            noteStatus: 'active',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-2',
+            noteStatus: 'active',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-3',
+            noteStatus: 'active',
+            isTrashed: false,
+          },
+        ],
+      },
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const ActiveNotesSelectionBarMobile: Story = {
+  parameters: { ...ActiveNotesSelectionBar.parameters },
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const ArchivedNotesSelectionBar: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        getSessionHandler,
+        getEmptyNotesHandler,
+        patchNoteByIdHandler,
+        signOutHandler,
+      ],
+    },
+    notesSelection: {
+      mockedCtxValue: {
+        notes: [
+          {
+            noteId: 'id-note-1',
+            noteStatus: 'archived',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-2',
+            noteStatus: 'archived',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-3',
+            noteStatus: 'archived',
+            isTrashed: false,
+          },
+        ],
+      },
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const ArchivedNotesSelectionBarMobile: Story = {
+  parameters: { ...ArchivedNotesSelectionBar.parameters },
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const NonTrashedNotesSelectionBar: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        getSessionHandler,
+        getEmptyNotesHandler,
+        patchNoteByIdHandler,
+        signOutHandler,
+      ],
+    },
+    notesSelection: {
+      mockedCtxValue: {
+        notes: [
+          {
+            noteId: 'id-note-1',
+            noteStatus: 'active',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-2',
+            noteStatus: 'archived',
+            isTrashed: false,
+          },
+          {
+            noteId: 'id-note-3',
+            noteStatus: 'archived',
+            isTrashed: false,
+          },
+        ],
+      },
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const NonTrashedNotesSelectionBarMobile: Story = {
+  parameters: { ...NonTrashedNotesSelectionBar.parameters },
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const TrashedNotesSelectionBar: Story = {
+  parameters: {
+    msw: ActiveNotesSelectionBar.parameters?.msw,
+    notesSelection: {
+      mockedCtxValue: {
+        notes: [
+          {
+            noteId: 'id-note-1',
+            noteStatus: 'active',
+            isTrashed: true,
+          },
+          {
+            noteId: 'id-note-2',
+            noteStatus: 'archived',
+            isTrashed: true,
+          },
+          {
+            noteId: 'id-note-3',
+            noteStatus: 'archived',
+            isTrashed: true,
+          },
+        ],
+      },
+    },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      );
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+  },
+};
+
+export const TrashedNotesSelectionBarMobile: Story = {
+  parameters: { ...TrashedNotesSelectionBar.parameters },
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getByRole('button', {
+          name: /^Clear all selection$/,
+        }),
+      ).toBeVisible();
+
+      await expect(canvas.getByText(/^3 selected$/)).toBeVisible();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: canvas.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.getByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).toBeVisible();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Archive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Unarchive$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Trash$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(async () => {
+      await userEvent.pointer({
+        keys: '[TouchA]',
+        target: screen.getByRole('button', {
+          name: /^Close selection actions menu$/,
+        }),
+      });
+    });
+
+    await waitFor(async () => {
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      ).not.toBeInTheDocument();
+
+      await expect(
+        screen.queryByRole('menuitem', {
+          name: /^Delete$/,
+        }),
+      ).not.toBeInTheDocument();
+    });
   },
 };
 
