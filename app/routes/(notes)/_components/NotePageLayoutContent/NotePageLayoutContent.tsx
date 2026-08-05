@@ -5,13 +5,13 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useDebounce } from 'use-debounce';
 
 import DialogNoteDetail from '../DialogNote/DialogNoteDetail/DialogNoteDetail';
+import AppSidebarContainer from './_internal-components/AppSidebarContainer';
+import AppTopBar from './_internal-components/AppTopBar/AppTopBar';
 
 import useSession from '~/hooks/react-query/auth/useSession';
 import useSignout from '~/hooks/react-query/auth/useSignout';
 import useBoolean from '~/hooks/useBoolean';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
-import AppSidebarContainer from './_internal-components/AppSidebarContainer';
-import AppTopBar from './_internal-components/AppTopBar';
 
 export default function NotesPageLayoutContent() {
   const location = useLocation();
