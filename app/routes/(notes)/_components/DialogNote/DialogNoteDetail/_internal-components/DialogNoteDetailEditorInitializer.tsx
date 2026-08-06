@@ -24,6 +24,7 @@ export default function DialogNoteDetailEditorInitializer({
   const noteEditor = useEditor({
     extensions: tiptapConfig.extensions,
     content: JSON.parse(noteContent),
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: clsx(tiptapConfig.defaultStyle, 'pb-80'),
@@ -32,6 +33,8 @@ export default function DialogNoteDetailEditorInitializer({
       },
     },
   });
+
+  if (!noteEditor) return null;
 
   return (
     <DialogNoteDetailContainer
