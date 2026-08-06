@@ -131,6 +131,7 @@ function DialogCreateNoteEditor({
 export default function DialogCreateNote() {
   const noteEditor = useEditor({
     extensions: tiptapConfig.extensions,
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: clsx(tiptapConfig.defaultStyle, 'pb-80'),
@@ -139,6 +140,8 @@ export default function DialogCreateNote() {
       },
     },
   });
+
+  if (!noteEditor) return null;
 
   return <DialogCreateNoteEditor noteEditor={noteEditor} />;
 }
