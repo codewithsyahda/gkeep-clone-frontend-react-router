@@ -1,3 +1,4 @@
+import * as cookie from 'cookie';
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
@@ -30,7 +31,10 @@ const sessionHandler = http.get(
         {
           headers: {
             'content-type': 'application/json',
-            'set-cookie': `auth.user_id=${userResponseData.id}; Path=/; HttpOnly; Secure; SameSite=Lax`,
+            'set-cookie': cookie.stringifySetCookie({
+              name: 'auth.user_id',
+              value: userResponseData.id,
+            }),
           },
         },
       );
@@ -63,8 +67,11 @@ const sessionHandler = http.get(
     return new HttpResponse(null, {
       headers: {
         'content-type': 'application/json',
-        'set-cookie':
-          'auth.user_id=; Max-Age=0 ;Path=/; HttpOnly; Secure; SameSite=Lax',
+        'set-cookie': cookie.stringifySetCookie({
+          name: 'auth.user_id',
+          value: '',
+          maxAge: 0,
+        }),
       },
     });
   },
