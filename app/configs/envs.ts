@@ -4,7 +4,7 @@ const envConfig = {
   },
   dev: {
     mock: {
-      api: import.meta.env.VITE_DEV_MOCK_API === 'true',
+      msw: import.meta.env.VITE_DEV_MOCK_MSW === 'true',
       auth: {
         signedIn: import.meta.env.VITE_DEV_MOCK_AUTH_SIGNED_IN === 'true',
       },
