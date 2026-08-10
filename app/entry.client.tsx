@@ -5,7 +5,7 @@ import { HydratedRouter } from 'react-router/dom';
 import envConfig from './configs/envs';
 
 async function enableMsw() {
-  if (envConfig.dev.mock.api) {
+  if (envConfig.dev.mock.msw) {
     const { mswBrowserWorker } = await import('./tests/mocks/apis/mswBrowser');
     await mswBrowserWorker.start();
   }
