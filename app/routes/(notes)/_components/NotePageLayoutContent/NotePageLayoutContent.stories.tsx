@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as cookie from 'cookie';
 import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
@@ -12,6 +13,7 @@ import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import envConfig from '~/configs/envs';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
+import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
 import NotePageLayoutContent from './NotePageLayoutContent';
 
 const meta = {
@@ -34,7 +36,7 @@ const meta = {
       </>
     );
   },
-  excludeStories: ['getSessionHandler', 'signOutHandler'],
+  excludeStories: ['getSessionHandler'],
 } satisfies Meta<typeof NotePageLayoutContent>;
 
 export default meta;
@@ -48,30 +50,25 @@ export const getSessionHandler = http.get(
 
     return HttpResponse.json(
       {
-        session: {
-          id: 'session-uuid',
-          token: 'session-token',
-          userId: 'user-uuid',
-          expiresAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          ipAddress: '127.0.0.1',
-          userAgent: 'Mozilla/5.0...',
-        },
-        user: {
-          id: 'id-user-1',
-          name: 'Foo Doe',
-          email: 'foo@doe.com',
-          emailVerified: false,
-          image: null,
-          createdAt: new Date(2026, 0, 1),
-          updatedAt: new Date(2026, 0, 1),
+        data: {
+          session: {
+            id: 'id-user-1',
+            name: 'Foo Doe',
+            email: 'foo@doe.com',
+            emailVerified: false,
+            image: null,
+            createdAt: new Date(2026, 0, 1),
+            updatedAt: new Date(2026, 0, 1),
+          },
         },
       },
       {
         headers: {
           'content-type': 'application/json',
-          'set-cookie': 'auth.user_id=id-user-1',
+          'set-cookie': cookie.stringifySetCookie({
+            name: 'auth.user_id',
+            value: 'id-user-1',
+          }),
         },
       },
     );
@@ -114,14 +111,6 @@ const patchNoteByIdHandler = http.patch<{
   await delay('real');
   return HttpResponse.json(null);
 });
-
-export const signOutHandler = http.post(
-  `${envConfig.api.baseUrl}/auth/sign-out`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({ success: true });
-  },
-);
 
 export const Default: Story = {
   parameters: {

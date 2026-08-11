@@ -7,10 +7,8 @@ import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
-import {
-  getSessionHandler,
-  signOutHandler,
-} from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
+import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
+import { getSessionHandler } from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
 import * as ActiveNotePageStories from '../ActiveNotePage.stories';
 import {
   getEmptyNotesHandler,
