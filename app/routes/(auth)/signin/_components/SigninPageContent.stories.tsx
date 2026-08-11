@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import * as cookie from 'cookie';
 import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
@@ -148,58 +149,66 @@ export const SigninSuccess: Story = {
             if (session) {
               return HttpResponse.json(
                 {
-                  session: {
-                    id: 'session-uuid',
-                    token: 'session-token',
-                    userId: 'user-uuid',
-                    expiresAt: new Date().toISOString(),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    ipAddress: '127.0.0.1',
-                    userAgent: 'Mozilla/5.0...',
-                  },
-                  user: {
-                    id: 'id-user-1',
-                    name: 'Foo Doe',
-                    email: 'foo@doe.com',
-                    emailVerified: false,
-                    image: null,
-                    createdAt: new Date(2026, 0, 1),
-                    updatedAt: new Date(2026, 0, 1),
+                  data: {
+                    session: {
+                      id: 'id-user-1',
+                      name: 'Foo Doe',
+                      email: 'foo@doe.com',
+                      emailVerified: false,
+                      image: null,
+                      createdAt: new Date(2026, 0, 1),
+                      updatedAt: new Date(2026, 0, 1),
+                    },
                   },
                 },
                 {
                   headers: {
                     'content-type': 'application/json',
-                    'set-cookie': 'auth.is_signed_in=; Max-Age=0',
+                    'set-cookie': cookie.stringifySetCookie({
+                      name: 'auth.is_signed_in',
+                      value: '',
+                      maxAge: 0,
+                    }),
                   },
                 },
               );
             }
 
-            return HttpResponse.json(null);
+            return HttpResponse.json(
+              {
+                error: {
+                  message: 'Please sign in first',
+                },
+              },
+              {
+                status: 401,
+              },
+            );
           },
         ),
         http.post(`${envConfig.api.baseUrl}/auth/sign-in/email`, async () => {
           await delay('real');
           return HttpResponse.json(
             {
-              redirect: false,
-              token: 'session-token',
-              user: {
-                id: 'id-user-1',
-                name: 'Foo Doe',
-                email: 'foo@doe.com',
-                emailVerified: false,
-                image: null,
-                createdAt: new Date(2026, 0, 1),
-                updatedAt: new Date(2026, 0, 1),
+              data: {
+                user: {
+                  id: 'id-user-1',
+                  name: 'Foo Doe',
+                  email: 'foo@doe.com',
+                  emailVerified: false,
+                  image: null,
+                  createdAt: new Date(2026, 0, 1),
+                  updatedAt: new Date(2026, 0, 1),
+                },
               },
             },
             {
               headers: {
                 'content-type': 'application/json',
-                'set-cookie': 'auth.is_signed_in=true',
+                'set-cookie': cookie.stringifySetCookie({
+                  name: 'auth.is_signed_in',
+                  value: 'true',
+                }),
               },
             },
           );
@@ -260,8 +269,9 @@ export const SigninClientError: Story = {
           await delay('real');
           return HttpResponse.json(
             {
-              message: 'Invalid email or password',
-              code: 'INVALID_EMAIL_OR_PASSWORD',
+              error: {
+                message: 'Invalid email or password',
+              },
             },
             { status: 401 },
           );
@@ -325,8 +335,9 @@ export const SigninServerError: Story = {
           await delay('real');
           return HttpResponse.json(
             {
-              message: 'Something went wrong',
-              code: 'INTERNAL_SERVER_ERROR',
+              error: {
+                message: 'Something went wrong',
+              },
             },
             { status: 500 },
           );

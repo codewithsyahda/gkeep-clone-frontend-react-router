@@ -14,16 +14,18 @@ const signInHandler = http.post(
       password: string;
     };
 
-    const user = usersDB.find((a) => a.email === email.toLowerCase());
+    const user = usersDB.find(
+      (u) => u.email === email.toLowerCase() && u.password === password,
+    );
 
-    if (user?.password === password) {
-      const { password: _password, ...userResponseData } = user;
+    if (user) {
+      const { password: _p, ...userResponseData } = user;
 
-      return new HttpResponse(
+      return HttpResponse.json(
         {
-          redirect: false,
-          token: userResponseData.id,
-          user: userResponseData,
+          data: {
+            user: userResponseData,
+          },
         },
         {
           headers: {
@@ -39,8 +41,9 @@ const signInHandler = http.post(
 
     return HttpResponse.json(
       {
-        message: 'Invalid email or password',
-        code: 'INVALID_EMAIL_OR_PASSWORD',
+        error: {
+          message: 'Invalid email or password',
+        },
       },
       { status: 401 },
     );

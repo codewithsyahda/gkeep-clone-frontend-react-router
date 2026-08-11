@@ -9,11 +9,9 @@ import envConfig from '~/configs/envs';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
+import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
 import NotesPageLayoutContent from '../_components/NotePageLayoutContent/NotePageLayoutContent';
-import {
-  getSessionHandler,
-  signOutHandler,
-} from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
+import { getSessionHandler } from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
 import * as ActiveNotePageStories from '../ActiveNotePage.stories';
 import {
   getEmptyNotesHandler,

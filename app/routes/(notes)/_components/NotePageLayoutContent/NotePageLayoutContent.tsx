@@ -8,10 +8,20 @@ import DialogNoteDetail from '../DialogNote/DialogNoteDetail/DialogNoteDetail';
 import AppSidebarContainer from './_internal-components/AppSidebarContainer';
 import AppTopBar from './_internal-components/AppTopBar/AppTopBar';
 
-import useSession from '~/hooks/react-query/auth/useSession';
-import useSignout from '~/hooks/react-query/auth/useSignout';
 import useBoolean from '~/hooks/useBoolean';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
+
+const useSession = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/auth/__mocks__/useSession')
+    : import('~/hooks/react-query/auth/useSession'))
+).default;
+
+const useSignout = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/auth/__mocks__/useSignout')
+    : import('~/hooks/react-query/auth/useSignout'))
+).default;
 
 export default function NotesPageLayoutContent() {
   const location = useLocation();

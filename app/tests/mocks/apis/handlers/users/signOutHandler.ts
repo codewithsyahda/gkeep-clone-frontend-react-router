@@ -8,8 +8,8 @@ const signOutHandler = http.post(
   async () => {
     await delay('real');
 
-    return new HttpResponse(
-      { success: true },
+    return HttpResponse.json(
+      { data: { success: true } },
       {
         headers: {
           'content-type': 'application/json',

@@ -15,7 +15,14 @@ export const getSessionHandler = http.get(
   `${envConfig.api.baseUrl}/auth/get-session`,
   async () => {
     await delay('real');
-    return HttpResponse.json(null);
+    return HttpResponse.json(
+      {
+        error: {
+          message: 'Please sign in first',
+        },
+      },
+      { status: 401 },
+    );
   },
 );
 
@@ -220,18 +227,22 @@ export const SignupSuccess: Story = {
         getSessionHandler,
         http.post(`${envConfig.api.baseUrl}/auth/sign-up/email`, async () => {
           await delay('real');
-          return HttpResponse.json({
-            token: null,
-            user: {
-              id: 'id-user-1',
-              name: 'Foo Doe',
-              email: 'foo@doe.com',
-              emailVerified: false,
-              image: null,
-              createdAt: new Date(2026, 0, 1),
-              updatedAt: new Date(2026, 0, 1),
+          return HttpResponse.json(
+            {
+              data: {
+                user: {
+                  id: 'id-user-1',
+                  name: 'Foo Doe',
+                  email: 'foo@doe.com',
+                  emailVerified: false,
+                  image: null,
+                  createdAt: new Date(2026, 0, 1),
+                  updatedAt: new Date(2026, 0, 1),
+                },
+              },
             },
-          });
+            { status: 201 },
+          );
         }),
       ],
     },
@@ -292,8 +303,9 @@ export const SignupClientError: Story = {
           await delay('real');
           return HttpResponse.json(
             {
-              message: 'User is already exist',
-              code: 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL',
+              error: {
+                message: 'User is already exist',
+              },
             },
             { status: 422 },
           );
@@ -361,10 +373,11 @@ export const SignupServerError: Story = {
           await delay('real');
           return HttpResponse.json(
             {
-              message: 'Failed to create user',
-              code: 'FAILED_TO_CREATE_USER',
+              error: {
+                message: 'Failed to create user',
+              },
             },
-            { status: 422 },
+            { status: 500 },
           );
         }),
       ],
