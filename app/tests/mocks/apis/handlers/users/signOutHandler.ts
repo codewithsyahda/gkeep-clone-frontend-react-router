@@ -9,7 +9,7 @@ const signOutHandler = http.post(
     await delay('real');
 
     return HttpResponse.json(
-      { success: true },
+      { data: { success: true } },
       {
         headers: {
           'content-type': 'application/json',
