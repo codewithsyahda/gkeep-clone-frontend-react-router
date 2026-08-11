@@ -9,31 +9,21 @@ const sessionHandler = http.get(
   async ({ cookies }) => {
     await delay('real');
 
-    const isSignedInByENV = envConfig.dev.mock.auth.signedIn;
-
-    if (isSignedInByENV) {
-      const { password: _password, ...userResponseData } = usersDB[0];
+    if (envConfig.dev.mock.auth.signedIn) {
+      const { password: _p, ...userSession } = usersDB[0];
 
       return HttpResponse.json(
         {
-          session: {
-            id: 'session-uuid',
-            token: 'session-token-xyz',
-            userId: userResponseData.id,
-            expiresAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            ipAddress: '127.0.0.1',
-            userAgent: 'Mozilla/5.0...',
+          data: {
+            session: userSession,
           },
-          user: userResponseData,
         },
         {
           headers: {
             'content-type': 'application/json',
             'set-cookie': cookie.stringifySetCookie({
               name: 'auth.user_id',
-              value: userResponseData.id,
+              value: userSession.id,
             }),
           },
         },
@@ -42,38 +32,36 @@ const sessionHandler = http.get(
 
     const userId = cookies['auth.user_id'];
 
-    const userData = usersDB.find((u) => u.id === userId);
+    const user = usersDB.find((u) => u.id === userId);
 
-    if (userId && userData) {
-      const { password: _password, ...userResponseData } = userData;
-
-      await delay('real');
+    if (user) {
+      const { password: _p, ...userSession } = user;
 
       return HttpResponse.json({
-        session: {
-          id: 'session-uuid',
-          token: 'session-token-xyz',
-          userId: userResponseData.id,
-          expiresAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          ipAddress: '127.0.0.1',
-          userAgent: 'Mozilla/5.0...',
+        data: {
+          session: userSession,
         },
-        user: userResponseData,
       });
     }
 
-    return new HttpResponse(null, {
-      headers: {
-        'content-type': 'application/json',
-        'set-cookie': cookie.stringifySetCookie({
-          name: 'auth.user_id',
-          value: '',
-          maxAge: 0,
-        }),
+    return HttpResponse.json(
+      {
+        error: {
+          message: 'Please sign in first',
+        },
       },
-    });
+      {
+        headers: {
+          'content-type': 'application/json',
+          'set-cookie': cookie.stringifySetCookie({
+            name: 'auth.user_id',
+            value: '',
+            maxAge: 0,
+          }),
+        },
+        status: 401,
+      },
+    );
   },
 );
 

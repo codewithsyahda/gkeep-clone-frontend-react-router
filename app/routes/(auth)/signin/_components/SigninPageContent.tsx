@@ -20,10 +20,20 @@ import Spinner from '~/components/Spinner';
 import AppBrandLogo from '~/routes/_components/AppBrandLogo';
 import AuthPageContainer from '../../_components/AuthPageContainer';
 
-import useSession from '~/hooks/react-query/auth/useSession';
-import useSigninWithEmail from '~/hooks/react-query/auth/useSigninWithEmail';
 import { SigninFormScheme } from '~/lib/definitions';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
+
+const useSession = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/auth/__mocks__/useSession')
+    : import('~/hooks/react-query/auth/useSession'))
+).default;
+
+const useSigninWithEmail = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/auth/__mocks__/useSigninWithEmail')
+    : import('~/hooks/react-query/auth/useSigninWithEmail'))
+).default;
 
 export default function SigninPageContent() {
   const rhf = useForm<z.infer<typeof SigninFormScheme>>({

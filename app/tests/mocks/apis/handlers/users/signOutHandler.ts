@@ -8,7 +8,7 @@ const signOutHandler = http.post(
   async () => {
     await delay('real');
 
-    return new HttpResponse(
+    return HttpResponse.json(
       { success: true },
       {
         headers: {

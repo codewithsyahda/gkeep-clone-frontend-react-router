@@ -20,18 +20,20 @@ const signUpHandler = http.post(
     if (sanitizedName.toLowerCase() === '[test 500]') {
       return HttpResponse.json(
         {
-          message: 'Failed to create user',
-          code: 'FAILED_TO_CREATE_USER',
+          error: {
+            message: 'Failed to create user',
+          },
         },
-        { status: 422 },
+        { status: 500 },
       );
     }
 
-    if (usersDB.some((a) => a.email === email.toLowerCase())) {
+    if (usersDB.some((u) => u.email === sanitizedEmail)) {
       return HttpResponse.json(
         {
-          message: 'User is already exist',
-          code: 'USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL',
+          error: {
+            message: 'User is already exist',
+          },
         },
         { status: 422 },
       );
@@ -50,12 +52,16 @@ const signUpHandler = http.post(
 
     usersDB.push(newUser);
 
-    const { password: _password, ...userResponseData } = newUser;
+    const { password: _p, ...userResponseData } = newUser;
 
-    return HttpResponse.json({
-      token: null,
-      user: userResponseData,
-    });
+    return HttpResponse.json(
+      {
+        data: {
+          user: userResponseData,
+        },
+      },
+      { status: 201 },
+    );
   },
 );
 
