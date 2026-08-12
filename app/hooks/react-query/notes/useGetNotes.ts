@@ -21,15 +21,7 @@ const useGetNotes = ({
     refetchOnMount?: boolean | 'always';
   };
 }> = {}) => {
-  type TData = {
-    notes: {
-      active: TNoteSimpleResponse[];
-      archived: TNoteSimpleResponse[];
-      trash: TNoteSimpleResponse[];
-    };
-  };
-
-  const queried = useQuery<TData>({
+  const queried = useQuery({
     queryKey: [
       'notes',
       {
@@ -54,7 +46,15 @@ const useGetNotes = ({
         },
       );
 
-      return (response.data as TSuccessResponse<TData>).data;
+      return (
+        response.data as TSuccessResponse<{
+          notes: {
+            active: TNoteSimpleResponse[];
+            archived: TNoteSimpleResponse[];
+            trash: TNoteSimpleResponse[];
+          };
+        }>
+      ).data;
     },
     enabled: queryOptions.enabled,
     refetchOnMount: queryOptions.refetchOnMount,

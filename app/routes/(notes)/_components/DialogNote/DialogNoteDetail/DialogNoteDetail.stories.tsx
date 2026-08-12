@@ -85,7 +85,18 @@ const patchContentNoteByIdSuccessHandler = http.patch<{
   noteId: string;
 }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
   await delay(1000);
-  return HttpResponse.json(null);
+  return HttpResponse.json({
+    data: {
+      note: {
+        id: `id-note-${Date.now()}`,
+        title: 'Title Note',
+        jsonContent: '{}',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: 'id-user-1',
+      },
+    },
+  });
 });
 
 export const ActiveNote: Story = {

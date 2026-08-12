@@ -16,7 +16,18 @@ export const patchNoteSuccessByIdHandler = http.patch<{
   noteId: string;
 }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
   await delay('real');
-  return HttpResponse.json(null);
+  return HttpResponse.json({
+    data: {
+      note: {
+        id: `id-note-${Date.now()}`,
+        title: 'Title Note',
+        jsonContent: '{}',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: 'id-user-1',
+      },
+    },
+  });
 });
 
 const meta = {
@@ -488,7 +499,15 @@ export const ArchiveError: Story = {
           noteId: string;
         }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
           await delay('real');
-          return HttpResponse.json(null, { status: 500 });
+          return HttpResponse.json(
+            {
+              title: 'Internal Server Error',
+              status: 500,
+              detail: 'Cannot process the request.',
+              errors: {},
+            },
+            { status: 500 },
+          );
         }),
       ],
     },
