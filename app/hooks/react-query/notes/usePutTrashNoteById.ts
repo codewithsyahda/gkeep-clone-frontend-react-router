@@ -32,9 +32,11 @@ const usePutTrashNoteById = () => {
         },
       );
 
-      return response.data as TSuccessResponse<{
-        note: TNoteSimpleResponse;
-      }>;
+      return (
+        response.data as TSuccessResponse<{
+          note: TNoteSimpleResponse;
+        }>
+      ).data;
     },
   });
 

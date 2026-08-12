@@ -14,9 +14,11 @@ const useCreateNote = () => {
         withCredentials: true,
       });
 
-      return response.data as TSuccessResponse<{
-        data: TNoteSimpleResponse;
-      }>;
+      return (
+        response.data as TSuccessResponse<{
+          note: TNoteSimpleResponse;
+        }>
+      ).data;
     },
   });
 
