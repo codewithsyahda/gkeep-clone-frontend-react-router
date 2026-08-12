@@ -67,7 +67,21 @@ const postNoteHandler = http.post(
   `${envConfig.api.baseUrl}/notes`,
   async () => {
     await delay('real');
-    return HttpResponse.json(null, { status: 201 });
+    return HttpResponse.json(
+      {
+        data: {
+          note: {
+            id: `id-note-${Date.now()}`,
+            title: 'Title Note',
+            jsonContent: '{}',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            authorId: 'id-user-1',
+          },
+        },
+      },
+      { status: 201 },
+    );
   },
 );
 
@@ -75,14 +89,36 @@ export const putNoteByIdHandler = http.put<{
   noteId: string;
 }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
   await delay('real');
-  return HttpResponse.json(null);
+  return HttpResponse.json({
+    data: {
+      note: {
+        id: `id-note-${Date.now()}`,
+        title: 'Title Note',
+        jsonContent: '{}',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: 'id-user-1',
+      },
+    },
+  });
 });
 
 export const patchNoteByIdHandler = http.patch<{
   noteId: string;
 }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
   await delay('real');
-  return HttpResponse.json(null);
+  return HttpResponse.json({
+    data: {
+      note: {
+        id: `id-note-${Date.now()}`,
+        title: 'Title Note',
+        jsonContent: '{}',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        authorId: 'id-user-1',
+      },
+    },
+  });
 });
 
 export const Default: Story = {

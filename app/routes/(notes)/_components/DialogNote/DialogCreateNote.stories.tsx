@@ -185,12 +185,12 @@ export const CreateNoteSuccess: Story = {
             {
               data: {
                 note: {
-                  id: 'string',
-                  title: 'string',
-                  jsonContent: 'string',
-                  createdAt: 'string',
-                  updatedAt: 'string',
-                  authorId: 'string',
+                  id: `id-note-${Date.now()}`,
+                  title: 'Title Note',
+                  jsonContent: '{}',
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                  authorId: 'id-user-1',
                 },
               },
             },
