@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import {
   reactRouterParameters,
   withRouter,
@@ -7,9 +6,14 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  getEmptyNotesHandler,
+  getNotesHandler,
+  getNotesLoadingHandler,
+  patchNoteByIdHandler,
+  putNoteByIdHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
-import { notes as notesDB } from '~/tests/mocks/apis/fakeDB/notes';
 import ActiveNotesPageContent from './ActiveNotesPageContent';
 
 const meta = {
@@ -34,94 +38,16 @@ const meta = {
       </SelectionNotesCtxProvider>
     ),
   ],
-  excludeStories: [
-    'getNotesHandler',
-    'getEmptyNotesHandler',
-    'putNoteByIdHandler',
-    'patchNoteByIdHandler',
-  ],
 } satisfies Meta<typeof ActiveNotesPageContent>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const getNotesHandler = http.get(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({
-      data: {
-        notes: {
-          active: notesDB.slice(0, 3),
-          archived: notesDB.slice(0, 3),
-          trash: notesDB.slice(0, 3),
-        },
-      },
-    });
-  },
-);
-
-export const getEmptyNotesHandler = http.get(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({
-      data: {
-        notes: {
-          active: [],
-          archived: [],
-          trash: [],
-        },
-      },
-    });
-  },
-);
-
-export const putNoteByIdHandler = http.put<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
-
-export const patchNoteByIdHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
-
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.get(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getNotesLoadingHandler],
     },
   },
   play: async ({ canvas }) => {

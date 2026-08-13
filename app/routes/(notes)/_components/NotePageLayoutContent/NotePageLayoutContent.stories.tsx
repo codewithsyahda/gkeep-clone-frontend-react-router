@@ -1,6 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import * as cookie from 'cookie';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
   reactRouterParameters,
@@ -10,7 +8,16 @@ import { expect, screen, waitFor } from 'storybook/test';
 
 import notesSelectionDecorator from '.storybook/decorators/notesSelection';
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  getSessionHandler,
+  signOutLoadingHandler,
+} from '.storybook/parameters/msw/authHandlers';
+import {
+  getEmptyNotesHandler,
+  patchNoteByIdHandler,
+  postNoteHandler,
+  putNoteByIdHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
@@ -36,117 +43,11 @@ const meta = {
       </>
     );
   },
-  excludeStories: ['getSessionHandler'],
 } satisfies Meta<typeof NotePageLayoutContent>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
-
-export const getSessionHandler = http.get(
-  `${envConfig.api.baseUrl}/auth/get-session`,
-  async () => {
-    await delay('real');
-
-    return HttpResponse.json(
-      {
-        data: {
-          session: {
-            id: 'id-user-1',
-            name: 'Foo Doe',
-            email: 'foo@doe.com',
-            emailVerified: false,
-            image: null,
-            createdAt: new Date(2026, 0, 1),
-            updatedAt: new Date(2026, 0, 1),
-          },
-        },
-      },
-      {
-        headers: {
-          'content-type': 'application/json',
-          'set-cookie': cookie.stringifySetCookie({
-            name: 'auth.user_id',
-            value: 'id-user-1',
-          }),
-        },
-      },
-    );
-  },
-);
-
-const getEmptyNotesHandler = http.get(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    return HttpResponse.json({
-      data: {
-        notes: {
-          active: [],
-          archived: [],
-          trash: [],
-        },
-      },
-    });
-  },
-);
-
-const postNoteHandler = http.post(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json(
-      {
-        data: {
-          note: {
-            id: `id-note-${Date.now()}`,
-            title: 'Title Note',
-            jsonContent: '{}',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            authorId: 'id-user-1',
-          },
-        },
-      },
-      { status: 201 },
-    );
-  },
-);
-
-const putNoteByIdHandler = http.put<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
-
-const patchNoteByIdHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
 
 export const Default: Story = {
   parameters: {
@@ -1468,13 +1369,7 @@ export const MatchedSearchNotesResult: Story = {
 export const SigningOut: Story = {
   parameters: {
     msw: {
-      handlers: [
-        getSessionHandler,
-        getNotesHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-out`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getSessionHandler, getNotesHandler, signOutLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {

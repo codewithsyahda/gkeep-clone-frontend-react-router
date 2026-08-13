@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http } from 'msw';
 import {
   reactRouterParameters,
   withRouter,
@@ -7,14 +6,14 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import {
   getEmptyNotesHandler,
   getNotesHandler,
+  getNotesLoadingHandler,
   patchNoteByIdHandler,
   putNoteByIdHandler,
-} from '../../_components/ActiveNotesPageContent.stories';
+} from '.storybook/parameters/msw/notesHandlers';
+import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import ArchivedNotesPageContent from './ArchiveNotesPageContent';
 
 const meta = {
@@ -51,11 +50,7 @@ type Story = StoryObj<typeof meta>;
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.get(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getNotesLoadingHandler],
     },
   },
   play: async ({ canvas }) => {

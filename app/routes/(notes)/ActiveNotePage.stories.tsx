@@ -1,18 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { Toaster } from 'sonner';
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import { getSessionHandler } from '.storybook/parameters/msw/authHandlers';
+import {
+  getEmptyNotesHandler,
+  patchNoteByIdHandler,
+  postNoteHandler,
+  putNoteByIdHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
 import ActiveNotesPageContent from './_components/ActiveNotesPageContent';
 import NotesPageLayoutContent from './_components/NotePageLayoutContent/NotePageLayoutContent';
-import { getSessionHandler } from './_components/NotePageLayoutContent/NotePageLayoutContent.stories';
 
 const meta = {
   title: 'Pages/ActiveNotePage',
@@ -52,74 +56,11 @@ const meta = {
       </SelectionNotesCtxProvider>
     );
   },
-  excludeStories: [
-    'getEmptyNotesHandler',
-    'putNoteByIdHandler',
-    'patchNoteByIdHandler',
-  ],
 } satisfies Meta;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
-
-const postNoteHandler = http.post(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json(
-      {
-        data: {
-          note: {
-            id: `id-note-${Date.now()}`,
-            title: 'Title Note',
-            jsonContent: '{}',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            authorId: 'id-user-1',
-          },
-        },
-      },
-      { status: 201 },
-    );
-  },
-);
-
-export const putNoteByIdHandler = http.put<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
-
-export const patchNoteByIdHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
 
 export const Default: Story = {
   parameters: {
@@ -171,21 +112,6 @@ export const CloseWithEscKey: Story = {
     );
   },
 };
-
-export const getEmptyNotesHandler = http.get(
-  `${envConfig.api.baseUrl}/notes`,
-  async () => {
-    return HttpResponse.json({
-      data: {
-        notes: {
-          active: [],
-          archived: [],
-          trash: [],
-        },
-      },
-    });
-  },
-);
 
 export const EmptyNotes: Story = {
   parameters: {

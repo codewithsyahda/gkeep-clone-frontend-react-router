@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
   reactRouterParameters,
@@ -8,27 +7,13 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  patchNoteByIdHandler,
+  patchNoteByIdLoadingHandler,
+  patchNoteByIdServerErrorHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import ActiveNoteCardComponent from './ActiveNoteCard';
-
-export const patchNoteSuccessByIdHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
 
 const meta = {
   title: 'Composites/ActiveNoteCard',
@@ -36,7 +21,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [patchNoteSuccessByIdHandler],
+      handlers: [patchNoteByIdHandler],
     },
     reactRouter: reactRouterParameters({
       routing: {
@@ -60,7 +45,6 @@ const meta = {
       );
     },
   ],
-  excludeStories: ['patchNoteSuccessByIdHandler'],
 } satisfies Meta<typeof ActiveNoteCardComponent>;
 
 export default meta;
@@ -445,13 +429,7 @@ export const Archiving: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [
-        http.patch<{
-          noteId: string;
-        }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [patchNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -494,22 +472,7 @@ export const ArchiveError: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [
-        http.patch<{
-          noteId: string;
-        }>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              title: 'Internal Server Error',
-              status: 500,
-              detail: 'Cannot process the request.',
-              errors: {},
-            },
-            { status: 500 },
-          );
-        }),
-      ],
+      handlers: [patchNoteByIdServerErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {

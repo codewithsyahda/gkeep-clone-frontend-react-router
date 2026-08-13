@@ -9,8 +9,13 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import {
+  getInvalidSessionHandler,
+  signInClientErrorHandler,
+  signInLoadingHandler,
+  signInServerErrorHandler,
+} from '.storybook/parameters/msw/authHandlers';
 import envConfig from '~/configs/envs';
-import { getSessionHandler } from '../../signup/_components/SignupPageContent.stories';
 import SigninPageContentComponent from './SigninPageContent';
 
 const meta = {
@@ -19,7 +24,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [getSessionHandler],
+      handlers: [getInvalidSessionHandler],
     },
     reactRouter: reactRouterParameters({
       location: {
@@ -98,12 +103,7 @@ export const SigningIn: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-in/email`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signInLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -263,20 +263,7 @@ export const SigninClientError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-in/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              error: {
-                message: 'Invalid email or password',
-              },
-            },
-            { status: 401 },
-          );
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signInClientErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -329,20 +316,7 @@ export const SigninServerError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-in/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              error: {
-                message: 'Something went wrong',
-              },
-            },
-            { status: 500 },
-          );
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signInServerErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
