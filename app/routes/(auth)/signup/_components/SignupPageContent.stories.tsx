@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
   reactRouterParameters,
@@ -8,23 +7,14 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  getInvalidSessionHandler,
+  signUpClientErrorHandler,
+  signUpHandler,
+  signUpLoadingHandler,
+  signUpServerErrorHandler,
+} from '.storybook/parameters/msw/authHandlers';
 import SignupPageContentComponent from './SignupPageContent';
-
-export const getSessionHandler = http.get(
-  `${envConfig.api.baseUrl}/auth/get-session`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json(
-      {
-        error: {
-          message: 'Please sign in first',
-        },
-      },
-      { status: 401 },
-    );
-  },
-);
 
 const meta = {
   title: 'Pages/SignupPageContent',
@@ -32,7 +22,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [getSessionHandler],
+      handlers: [getInvalidSessionHandler],
     },
     reactRouter: reactRouterParameters({
       location: {
@@ -55,7 +45,6 @@ const meta = {
     ),
     withRouter,
   ],
-  excludeStories: ['getSessionHandler'],
 } satisfies Meta<typeof SignupPageContentComponent>;
 
 export default meta;
@@ -181,12 +170,7 @@ export const SigningUp: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-up/email`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signUpLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -223,28 +207,7 @@ export const SignupSuccess: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-up/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              data: {
-                user: {
-                  id: 'id-user-1',
-                  name: 'Foo Doe',
-                  email: 'foo@doe.com',
-                  emailVerified: false,
-                  image: null,
-                  createdAt: new Date(2026, 0, 1),
-                  updatedAt: new Date(2026, 0, 1),
-                },
-              },
-            },
-            { status: 201 },
-          );
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signUpHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -297,20 +260,7 @@ export const SignupClientError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-up/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              error: {
-                message: 'User is already exist',
-              },
-            },
-            { status: 422 },
-          );
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signUpClientErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -367,20 +317,7 @@ export const SignupServerError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [
-        getSessionHandler,
-        http.post(`${envConfig.api.baseUrl}/auth/sign-up/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              error: {
-                message: 'Failed to create user',
-              },
-            },
-            { status: 500 },
-          );
-        }),
-      ],
+      handlers: [getInvalidSessionHandler, signUpServerErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {

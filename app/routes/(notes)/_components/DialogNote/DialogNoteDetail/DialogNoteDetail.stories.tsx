@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import {
   reactRouterParameters,
   withRouter,
@@ -7,7 +6,18 @@ import {
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  deleteNoteByIdLoadingHandler,
+  getActiveNoteByIdHandler,
+  getArchivedNoteByIdHandler,
+  getNoteByIdClientErrorHandler,
+  getNoteByIdLoadingHandler,
+  getNoteByIdServerErrorHandler,
+  getTrashedNoteByIdHandler,
+  patchNoteByIdHandler,
+  patchNoteByIdLoadingHandler,
+  putNoteByIdLoadingHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import * as DialogCreateNoteStories from '../DialogCreateNote.stories';
 import DialogNoteDetailComponent from './DialogNoteDetail';
 
@@ -32,16 +42,6 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-const mockedResponseNote = {
-  id: 'id-note-1',
-  title: 'Note Title 1',
-  jsonContent:
-    '{"type":"doc","content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Note 1 Heading 1"}]},{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"Note 1 Heading 2"}]},{"type":"paragraph","content":[{"type":"text","text":"Note 1 "},{"type":"text","marks":[{"type":"bold"}],"text":"paragraph"},{"type":"text","text":" 1."}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list bullet 1"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list bullet 2"}]}]}]},{"type":"paragraph","content":[{"type":"text","text":"Note 1 "},{"type":"text","marks":[{"type":"italic"}],"text":"paragraph"},{"type":"text","text":" "},{"type":"text","marks":[{"type":"underline"}],"text":"2"},{"type":"text","text":"."}]},{"type":"orderedList","attrs":{"start":1,"type":null},"content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list #1"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Note 1 list #2"}]}]}]},{"type":"paragraph"}]}',
-  createdAt: new Date(2026, 1, 1).toISOString(),
-  updatedAt: new Date(2026, 1, 1).toISOString(),
-  authorId: 'id-user-1',
-};
-
 export const Loading: Story = {
   parameters: {
     reactRouter: reactRouterParameters({
@@ -53,57 +53,16 @@ export const Loading: Story = {
       },
     }),
     msw: {
-      handlers: [
-        http.get<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('infinite');
-          },
-        ),
-      ],
+      handlers: [getNoteByIdLoadingHandler],
     },
   },
 };
-
-const getActiveNoteByIdHandler = http.get<{ noteId: string }>(
-  `${envConfig.api.baseUrl}/notes/:noteId`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({
-      data: {
-        note: {
-          ...mockedResponseNote,
-          archivedAt: null,
-          trashedAt: null,
-        },
-      },
-    });
-  },
-);
-
-const patchContentNoteByIdSuccessHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay(1000);
-  return HttpResponse.json({
-    data: {
-      note: {
-        id: `id-note-${Date.now()}`,
-        title: 'Title Note',
-        jsonContent: '{}',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        authorId: 'id-user-1',
-      },
-    },
-  });
-});
 
 export const ActiveNote: Story = {
   parameters: {
     reactRouter: Loading?.parameters?.reactRouter,
     msw: {
-      handlers: [getActiveNoteByIdHandler, patchContentNoteByIdSuccessHandler],
+      handlers: [getActiveNoteByIdHandler, patchNoteByIdHandler],
     },
   },
   play: DialogCreateNoteStories.Default.play,
@@ -268,17 +227,11 @@ export const ClosedActiveNoteInfoSmallMobile: Story = {
   },
 };
 
-const putNoteByIdInfiniteHandler = http.put<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('infinite');
-});
-
 export const ArchivingActiveNote: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [getActiveNoteByIdHandler, putNoteByIdInfiniteHandler],
+      handlers: [getActiveNoteByIdHandler, putNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -355,17 +308,11 @@ export const TrashingActiveNote: Story = {
   },
 };
 
-const patchNoteByIdInfiniteHandler = http.patch<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('infinite');
-});
-
 export const UpdatingActiveNote: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [getActiveNoteByIdHandler, patchNoteByIdInfiniteHandler],
+      handlers: [getActiveNoteByIdHandler, patchNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -463,22 +410,6 @@ export const UpdateSuccessActiveNote: Story = {
   },
 };
 
-const getArchivedNoteByIdHandler = http.get<{ noteId: string }>(
-  `${envConfig.api.baseUrl}/notes/:noteId`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({
-      data: {
-        note: {
-          ...mockedResponseNote,
-          archivedAt: new Date(2026, 1, 2).toISOString(),
-          trashedAt: null,
-        },
-      },
-    });
-  },
-);
-
 export const ArchivedNote: Story = {
   parameters: {
     reactRouter: reactRouterParameters({
@@ -491,10 +422,7 @@ export const ArchivedNote: Story = {
       },
     }),
     msw: {
-      handlers: [
-        getArchivedNoteByIdHandler,
-        patchContentNoteByIdSuccessHandler,
-      ],
+      handlers: [getArchivedNoteByIdHandler, patchNoteByIdHandler],
     },
   },
   play: DialogCreateNoteStories.Default.play,
@@ -571,7 +499,7 @@ export const UnarchiveArchivedNote: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [getArchivedNoteByIdHandler, putNoteByIdInfiniteHandler],
+      handlers: [getArchivedNoteByIdHandler, putNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -652,7 +580,7 @@ export const UpdatingArchivedNote: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [getArchivedNoteByIdHandler, patchNoteByIdInfiniteHandler],
+      handlers: [getArchivedNoteByIdHandler, patchNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -694,22 +622,6 @@ export const UpdateSuccessArchivedNote: Story = {
   },
   play: UpdateSuccessActiveNote.play,
 };
-
-const getTrashedNoteByIdHandler = http.get<{ noteId: string }>(
-  `${envConfig.api.baseUrl}/notes/:noteId`,
-  async () => {
-    await delay('real');
-    return HttpResponse.json({
-      data: {
-        note: {
-          ...mockedResponseNote,
-          archivedAt: null,
-          trashedAt: new Date(2026, 1, 2).toISOString(),
-        },
-      },
-    });
-  },
-);
 
 export const TrashedNote: Story = {
   parameters: {
@@ -876,7 +788,7 @@ export const RestoringTrashedNote: Story = {
   parameters: {
     ...TrashedNote.parameters,
     msw: {
-      handlers: [getTrashedNoteByIdHandler, patchNoteByIdInfiniteHandler],
+      handlers: [getTrashedNoteByIdHandler, patchNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -918,15 +830,7 @@ export const DeletingTrashedNote: Story = {
   parameters: {
     ...RestoringTrashedNote.parameters,
     msw: {
-      handlers: [
-        getTrashedNoteByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('infinite');
-          },
-        ),
-      ],
+      handlers: [getTrashedNoteByIdHandler, deleteNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -959,15 +863,7 @@ export const NotFoundError: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [
-        http.get<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null, { status: 404 });
-          },
-        ),
-      ],
+      handlers: [getNoteByIdClientErrorHandler],
     },
   },
   play: async ({ canvas }) => {
@@ -987,15 +883,7 @@ export const ServerError: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [
-        http.get<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null, { status: 500 });
-          },
-        ),
-      ],
+      handlers: [getNoteByIdServerErrorHandler],
     },
   },
   play: async ({ canvas }) => {

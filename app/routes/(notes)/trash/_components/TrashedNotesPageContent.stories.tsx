@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import {
   reactRouterParameters,
   withRouter,
@@ -7,13 +6,16 @@ import {
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import {
+  deleteNoteByIdHandler,
+  deleteNotesHandler,
+  deleteNotesLoadingHandler,
   getEmptyNotesHandler,
   getNotesHandler,
+  getNotesLoadingHandler,
   patchNoteByIdHandler,
-} from '../../_components/ActiveNotesPageContent.stories';
+} from '.storybook/parameters/msw/notesHandlers';
+import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import TrashedNotesPageContent from './TrashedNotesPageContent';
 
 const meta = {
@@ -50,11 +52,7 @@ type Story = StoryObj<typeof meta>;
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.get(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [getNotesLoadingHandler],
     },
   },
   play: async ({ canvas }) => {
@@ -101,26 +99,14 @@ export const Empty: Story = {
   },
 };
 
-const deleteNotesByIdHandler = http.delete<{
-  noteId: string;
-}>(`${envConfig.api.baseUrl}/notes/:noteId`, async () => {
-  await delay('real');
-  return HttpResponse.json(null, { status: 204 });
-});
-
 export const AvailableNotes: Story = {
   parameters: {
     msw: {
       handlers: [
         getNotesHandler,
         patchNoteByIdHandler,
-        http.delete<{
-          noteId: string;
-        }>(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('real');
-          return HttpResponse.json(null, { status: 204 });
-        }),
-        deleteNotesByIdHandler,
+        deleteNotesHandler,
+        deleteNoteByIdHandler,
       ],
     },
   },
@@ -244,10 +230,8 @@ export const DeletingAllNotes: Story = {
       handlers: [
         getNotesHandler,
         patchNoteByIdHandler,
-        deleteNotesByIdHandler,
-        http.delete(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('infinite');
-        }),
+        deleteNoteByIdHandler,
+        deleteNotesLoadingHandler,
       ],
     },
   },

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
   reactRouterParameters,
@@ -8,10 +7,14 @@ import {
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  deleteNoteByIdHandler,
+  deleteNoteByIdLoadingHandler,
+  deleteNoteByIdServerErrorHandler,
+  patchNoteByIdHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import * as ActiveNoteCardStories from './ActiveNoteCard.stories';
-import { patchNoteSuccessByIdHandler } from './ActiveNoteCard.stories';
 import TrashedNoteCardComponent from './TrashedNoteCard';
 
 const meta = {
@@ -20,16 +23,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [
-        patchNoteSuccessByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null, { status: 204 });
-          },
-        ),
-      ],
+      handlers: [patchNoteByIdHandler, deleteNoteByIdHandler],
     },
     reactRouter: reactRouterParameters({
       routing: {
@@ -477,15 +471,7 @@ export const Deleting: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [
-        patchNoteSuccessByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('infinite');
-          },
-        ),
-      ],
+      handlers: [patchNoteByIdHandler, deleteNoteByIdLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -523,16 +509,7 @@ export const DeleteSuccess: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [
-        patchNoteSuccessByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return new HttpResponse(null, { status: 200 });
-          },
-        ),
-      ],
+      handlers: [patchNoteByIdHandler, deleteNoteByIdHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -580,16 +557,7 @@ export const DeleteError: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [
-        patchNoteSuccessByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null, { status: 500 });
-          },
-        ),
-      ],
+      handlers: [patchNoteByIdHandler, deleteNoteByIdServerErrorHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {

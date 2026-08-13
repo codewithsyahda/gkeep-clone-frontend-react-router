@@ -7,9 +7,9 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import { patchNoteByIdHandler } from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import * as ActiveNoteCardStories from './ActiveNoteCard.stories';
-import { patchNoteSuccessByIdHandler } from './ActiveNoteCard.stories';
 import ArchivedNoteCardComponent from './ArchivedNoteCard';
 
 const meta = {
@@ -18,7 +18,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [patchNoteSuccessByIdHandler],
+      handlers: [patchNoteByIdHandler],
     },
     reactRouter: reactRouterParameters({
       routing: {

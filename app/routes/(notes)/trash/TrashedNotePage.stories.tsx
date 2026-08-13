@@ -1,23 +1,23 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { Toaster } from 'sonner';
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import { getSessionHandler } from '.storybook/parameters/msw/authHandlers';
+import {
+  deleteNoteByIdHandler,
+  deleteNotesHandler,
+  getEmptyNotesHandler,
+  patchNoteByIdHandler,
+  putNoteByIdHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
 import NotesPageLayoutContent from '../_components/NotePageLayoutContent/NotePageLayoutContent';
-import { getSessionHandler } from '../_components/NotePageLayoutContent/NotePageLayoutContent.stories';
 import * as ActiveNotePageStories from '../ActiveNotePage.stories';
-import {
-  getEmptyNotesHandler,
-  patchNoteByIdHandler,
-  putNoteByIdHandler,
-} from '../ActiveNotePage.stories';
 import TrashedNotesPageContent from './_components/TrashedNotesPageContent';
 
 const meta = {
@@ -75,20 +75,8 @@ export const Default: Story = {
         getNoteByIdHandler,
         putNoteByIdHandler,
         patchNoteByIdHandler,
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes/:noteId`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null);
-          },
-        ),
-        http.delete<{ noteId: string }>(
-          `${envConfig.api.baseUrl}/notes`,
-          async () => {
-            await delay('real');
-            return HttpResponse.json(null);
-          },
-        ),
+        deleteNoteByIdHandler,
+        deleteNotesHandler,
         signOutHandler,
       ],
     },

@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import { withRouter } from 'storybook-addon-remix-react-router';
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import envConfig from '~/configs/envs';
+import {
+  postNoteHandler,
+  postNoteLoadingHandler,
+} from '.storybook/parameters/msw/notesHandlers';
 import DialogCreateNoteComponent from './DialogCreateNote';
 
 const meta = {
@@ -143,11 +145,7 @@ export const FocusTrap: Story = {
 export const Creating: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.post(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('infinite');
-        }),
-      ],
+      handlers: [postNoteLoadingHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -178,26 +176,7 @@ export const Creating: Story = {
 export const CreateNoteSuccess: Story = {
   parameters: {
     msw: {
-      handlers: [
-        http.post(`${envConfig.api.baseUrl}/notes`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              data: {
-                note: {
-                  id: `id-note-${Date.now()}`,
-                  title: 'Title Note',
-                  jsonContent: '{}',
-                  createdAt: new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                  authorId: 'id-user-1',
-                },
-              },
-            },
-            { status: 201 },
-          );
-        }),
-      ],
+      handlers: [postNoteHandler],
     },
   },
   play: async ({ canvas, userEvent }) => {
