@@ -99,3 +99,21 @@ export const notes: TNotesFakeDB = [
     .trim()
     .replaceAll(/\s+/g, ' '),
 }));
+
+export class NotesDB {
+  protected static _dbName = 'notesDB';
+
+  static init() {
+    window.sessionStorage.setItem(this._dbName, JSON.stringify(notes));
+  }
+
+  static getAll() {
+    return JSON.parse(
+      window.sessionStorage.getItem(this._dbName) ?? '[]',
+    ) as TNotesFakeDB;
+  }
+
+  static update(updatedNotes: TNotesFakeDB) {
+    window.sessionStorage.setItem(this._dbName, JSON.stringify(updatedNotes));
+  }
+}

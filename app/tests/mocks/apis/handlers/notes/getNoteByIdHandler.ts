@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { notes as notesDB } from '../../fakeDB/notes';
+import { NotesDB } from '../../fakeDB/notes';
 
 const getNoteByIdHandler = http.get<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
@@ -24,7 +24,9 @@ const getNoteByIdHandler = http.get<{ noteId: string }>(
 
     const { noteId } = params;
 
-    const targetedNote = notesDB.find(
+    const notes = NotesDB.getAll();
+
+    const targetedNote = notes.find(
       (n) => n.id === noteId && n.authorId === userId,
     );
 

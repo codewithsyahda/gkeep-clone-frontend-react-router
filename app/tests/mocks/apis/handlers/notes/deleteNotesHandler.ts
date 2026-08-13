@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { notes as notesDB } from '../../fakeDB/notes';
+import { NotesDB } from '../../fakeDB/notes';
 
 const deleteNotesHandler = http.delete(
   `${envConfig.api.baseUrl}/notes`,
@@ -22,16 +22,13 @@ const deleteNotesHandler = http.delete(
       );
     }
 
-    notesDB
-      .filter((n) => n.trashedAt !== null && n.authorId === userId)
-      .forEach(() => {
-        notesDB.splice(
-          notesDB.findIndex(
-            (n) => n.trashedAt !== null && n.authorId === userId,
-          ),
-          1,
-        );
-      });
+    NotesDB.update(
+      NotesDB.getAll().filter(
+        (n) =>
+          n.authorId !== userId ||
+          (n.authorId === userId && n.trashedAt === null),
+      ),
+    );
 
     return HttpResponse.json(null, { status: 204 });
   },

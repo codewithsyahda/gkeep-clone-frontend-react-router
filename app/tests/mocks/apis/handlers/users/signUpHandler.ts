@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { users as usersDB, type TUserEntity } from '../../fakeDB/users';
+import { UsersDB, type TUserEntity } from '../../fakeDB/users';
 
 const signUpHandler = http.post(
   `${envConfig.api.baseUrl}/auth/sign-up/email`,
@@ -28,7 +28,9 @@ const signUpHandler = http.post(
       );
     }
 
-    if (usersDB.some((u) => u.email === sanitizedEmail)) {
+    const users = UsersDB.getAll();
+
+    if (users.some((u) => u.email === sanitizedEmail)) {
       return HttpResponse.json(
         {
           error: {
@@ -50,7 +52,9 @@ const signUpHandler = http.post(
       updatedAt: new Date(),
     };
 
-    usersDB.push(newUser);
+    users.push(newUser);
+
+    UsersDB.update(users);
 
     const { password: _p, ...userResponseData } = newUser;
 

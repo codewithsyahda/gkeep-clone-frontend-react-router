@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 import envConfig from '~/configs/envs';
 import tiptapConfig from '~/configs/tiptap';
 import type { TMutateNoteRequest } from '~/types/models/notes';
-import { notes as notesDB } from '../../fakeDB/notes';
+import { NotesDB } from '../../fakeDB/notes';
 
 const putNoteById = http.put<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
@@ -31,7 +31,9 @@ const putNoteById = http.put<{ noteId: string }>(
       .clone()
       .json()) as TMutateNoteRequest;
 
-    const targetedNoteIdx = notesDB.findIndex(
+    const notes = NotesDB.getAll();
+
+    const targetedNoteIdx = notes.findIndex(
       (n) => n.id === noteId && n.authorId === userId,
     );
 
@@ -47,7 +49,7 @@ const putNoteById = http.put<{ noteId: string }>(
       );
     }
 
-    const targetedNote = notesDB[targetedNoteIdx];
+    const targetedNote = notes[targetedNoteIdx];
     const sanitizedTitle = title.trim().replaceAll(/\s+/g, ' ');
 
     if (sanitizedTitle.toLowerCase() === '[test 500]') {
@@ -93,6 +95,8 @@ const putNoteById = http.put<{ noteId: string }>(
     } else {
       targetedNote.trashedAt = null;
     }
+
+    NotesDB.update(notes);
 
     const {
       textContent: _tC,
