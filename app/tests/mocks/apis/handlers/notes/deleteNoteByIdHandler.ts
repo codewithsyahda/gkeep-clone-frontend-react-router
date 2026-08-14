@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { notes as notesDB } from '../../fakeDB/notes';
+import { NotesDB } from '../../fakeDB/notes';
 
 const deleteNoteByIdHandler = http.delete<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
@@ -22,11 +22,9 @@ const deleteNoteByIdHandler = http.delete<{ noteId: string }>(
       );
     }
 
-    const targetedNoteIdx = notesDB.findIndex(
-      (n) => n.id === params.noteId && n.authorId === userId,
-    );
+    const notes = NotesDB.getAll();
 
-    if (targetedNoteIdx === -1) {
+    if (!notes.some((n) => n.authorId === userId && n.id === params.noteId)) {
       return HttpResponse.json(
         {
           title: 'Resource Not Found',
@@ -38,7 +36,13 @@ const deleteNoteByIdHandler = http.delete<{ noteId: string }>(
       );
     }
 
-    notesDB.splice(targetedNoteIdx, 1);
+    NotesDB.update(
+      notes.filter(
+        (n) =>
+          n.authorId !== userId ||
+          (n.authorId === userId && n.id !== params.noteId),
+      ),
+    );
 
     return HttpResponse.json(null, { status: 204 });
   },

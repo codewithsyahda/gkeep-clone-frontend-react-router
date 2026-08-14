@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 import envConfig from '~/configs/envs';
 import tiptapConfig from '~/configs/tiptap';
 import type { TCreateNoteRequest } from '~/types/models/notes';
-import { notes as notesDB, type TNoteEntity } from '../../fakeDB/notes';
+import { NotesDB, type TNoteEntity } from '../../fakeDB/notes';
 
 const postNoteHandler = http.post(
   `${envConfig.api.baseUrl}/notes`,
@@ -60,7 +60,7 @@ const postNoteHandler = http.post(
       authorId: userId,
     };
 
-    notesDB.push(newNote);
+    NotesDB.update([...NotesDB.getAll(), newNote]);
 
     const {
       textContent: _textContent,

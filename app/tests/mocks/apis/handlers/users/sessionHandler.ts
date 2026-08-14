@@ -2,15 +2,17 @@ import * as cookie from 'cookie';
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { users as usersDB } from '../../fakeDB/users';
+import { UsersDB } from '../../fakeDB/users';
 
 const sessionHandler = http.get(
   `${envConfig.api.baseUrl}/auth/get-session`,
   async ({ cookies }) => {
     await delay('real');
 
+    const users = UsersDB.getAll();
+
     if (envConfig.dev.mock.auth.signedIn) {
-      const { password: _p, ...userSession } = usersDB[0];
+      const { password: _p, ...userSession } = users[0];
 
       return HttpResponse.json(
         {
@@ -32,7 +34,7 @@ const sessionHandler = http.get(
 
     const userId = cookies['auth.user_id'];
 
-    const user = usersDB.find((u) => u.id === userId);
+    const user = users.find((u) => u.id === userId);
 
     if (user) {
       const { password: _p, ...userSession } = user;

@@ -2,7 +2,7 @@ import * as cookie from 'cookie';
 import { delay, http, HttpResponse } from 'msw';
 
 import envConfig from '~/configs/envs';
-import { users as usersDB } from '../../fakeDB/users';
+import { UsersDB } from '../../fakeDB/users';
 
 const signInHandler = http.post(
   `${envConfig.api.baseUrl}/auth/sign-in/email`,
@@ -14,7 +14,9 @@ const signInHandler = http.post(
       password: string;
     };
 
-    const user = usersDB.find(
+    const users = UsersDB.getAll();
+
+    const user = users.find(
       (u) => u.email === email.toLowerCase() && u.password === password,
     );
 

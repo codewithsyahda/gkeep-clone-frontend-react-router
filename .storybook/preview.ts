@@ -8,9 +8,16 @@ import '../app/app.css';
 import type { Preview } from '@storybook/react-vite';
 import { initialize, mswLoader } from 'msw-storybook-addon';
 
+import { notes } from '~/tests/mocks/apis/fakeDB/notes';
+import { users } from '~/tests/mocks/apis/fakeDB/users';
 import muiThemeDecorator from './decorators/muiTheme';
 
 initialize();
+
+if (window) {
+  window.sessionStorage.setItem('usersDB', JSON.stringify(users));
+  window.sessionStorage.setItem('notesDB', JSON.stringify(notes));
+}
 
 const preview: Preview = {
   loaders: [mswLoader],

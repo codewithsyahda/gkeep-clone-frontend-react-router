@@ -31,3 +31,21 @@ export const users: TUserEntity[] = [
     updatedAt: new Date(2026, 0, 2),
   },
 ];
+
+export class UsersDB {
+  protected static _dbName = 'usersDB';
+
+  static init() {
+    window.sessionStorage.setItem(this._dbName, JSON.stringify(users));
+  }
+
+  static getAll() {
+    return JSON.parse(
+      window.sessionStorage.getItem(this._dbName) ?? '[]',
+    ) as TUserEntity[];
+  }
+
+  static update(updatedUsers: TUserEntity[]) {
+    window.sessionStorage.setItem(this._dbName, JSON.stringify(updatedUsers));
+  }
+}
