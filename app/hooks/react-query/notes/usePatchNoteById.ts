@@ -1,7 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 
+import ResponseError from '~/exceptions/responseError';
 import axiosInstance from '~/lib/http';
-import type { TSuccessResponse } from '~/types/http';
+import type { TErrorResponse, TSuccessResponse } from '~/types/http';
 import type {
   TMutateNoteRequest,
   TNoteSimpleResponse,
@@ -34,38 +36,55 @@ const usePatchNoteById = () => {
         throw new Error('Must define at least one payload field');
       }
 
-      const response = await axiosInstance.patch(
-        `/notes/${encodeURIComponent(noteId.trim())}`,
-        {
-          ...(titlePayload === undefined
-            ? {}
-            : {
-                title: titlePayload,
-              }),
-          ...(jsonContentPayload === undefined
-            ? {}
-            : {
-                jsonContent: jsonContentPayload,
-              }),
-          ...(statusPayload === undefined
-            ? {}
-            : {
-                status: statusPayload,
-              }),
-          ...(isTrashedPayload === undefined
-            ? {}
-            : {
-                isTrashed: isTrashedPayload,
-              }),
-        },
-        { withCredentials: true },
-      );
+      try {
+        const response = await axiosInstance.patch(
+          `/notes/${encodeURIComponent(noteId.trim())}`,
+          {
+            ...(titlePayload === undefined
+              ? {}
+              : {
+                  title: titlePayload,
+                }),
+            ...(jsonContentPayload === undefined
+              ? {}
+              : {
+                  jsonContent: jsonContentPayload,
+                }),
+            ...(statusPayload === undefined
+              ? {}
+              : {
+                  status: statusPayload,
+                }),
+            ...(isTrashedPayload === undefined
+              ? {}
+              : {
+                  isTrashed: isTrashedPayload,
+                }),
+          },
+          { withCredentials: true },
+        );
 
-      return (
-        response.data as TSuccessResponse<{
-          note: TNoteSimpleResponse;
-        }>
-      ).data;
+        return (
+          response.data as TSuccessResponse<{
+            note: TNoteSimpleResponse;
+          }>
+        ).data;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+
+        if (isAxiosError(error) && error.response) {
+          const errData = error.response.data as TErrorResponse<object>;
+
+          throw new ResponseError({
+            status: errData.status,
+            errors: errData.errors,
+            message: errData.detail,
+          });
+        }
+
+        throw new Error('Failed to patch note');
+      }
     },
   });
 
