@@ -255,6 +255,14 @@ export const deleteNoteByIdServerErrorHandler = http.delete<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
   async () => {
     await delay('real');
-    return HttpResponse.json(null, { status: 500 });
+    return HttpResponse.json(
+      {
+        title: 'Internal Server Error',
+        status: 500,
+        detail: 'Cannot process the request.',
+        errors: {},
+      },
+      { status: 500 },
+    );
   },
 );
