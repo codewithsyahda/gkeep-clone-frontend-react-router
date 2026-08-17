@@ -24,25 +24,15 @@ const deleteNoteByIdHandler = http.delete<{ noteId: string }>(
 
     const notes = NotesDB.getAll();
 
-    if (!notes.some((n) => n.authorId === userId && n.id === params.noteId)) {
-      return HttpResponse.json(
-        {
-          title: 'Resource Not Found',
-          status: 404,
-          detail: `Note with ID ${params.noteId} is not found`,
-          errors: {},
-        },
-        { status: 404 },
-      );
-    }
-
-    NotesDB.update(
-      notes.filter(
-        (n) =>
-          n.authorId !== userId ||
-          (n.authorId === userId && n.id !== params.noteId),
-      ),
+    const targetedNoteIdx = notes.findIndex(
+      (n) =>
+        n.id === params.noteId && n.authorId === userId && n.trashedAt !== null,
     );
+
+    if (targetedNoteIdx) {
+      notes.splice(targetedNoteIdx, 1);
+      NotesDB.update(notes);
+    }
 
     return HttpResponse.json(null, { status: 204 });
   },
