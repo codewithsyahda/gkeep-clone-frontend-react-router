@@ -11,8 +11,20 @@ import SidebarContentAlertContainer from '~/routes/_components/SidebarContentAle
 import ActiveNoteCard from '../../NoteCard/ActiveNoteCard';
 import ArchivedNoteCard from '../../NoteCard/ArchivedNoteCard';
 
-import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
+import envConfig from '~/configs/envs';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
+const useGetNotes = (
+  await (isLocalDev
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
+    : import('~/hooks/react-query/notes/useGetNotes'))
+).default;
 
 export default function AppSidebarContentContainer({
   searchNotesQuery,

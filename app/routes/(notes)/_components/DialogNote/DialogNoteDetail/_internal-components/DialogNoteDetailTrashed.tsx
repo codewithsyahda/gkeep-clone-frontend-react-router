@@ -20,12 +20,24 @@ import NoteEditor from '../../_internal-components/NoteEditor';
 import ButtonNoteInfo from './ButtonNoteInfo';
 import DialogNoteDetailInfo from './DialogNoteDetailInfo';
 
-import useDeleteNoteById from '~/hooks/react-query/notes/useDeleteNoteById';
+import envConfig from '~/configs/envs';
 import useBoolean from '~/hooks/useBoolean';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import type { TNoteStatus } from '~/types/models/notes';
 import formatDate from '~/utils/formatDate';
 import useDialogFullScreen from '../../_internal-hooks/useDialogFullScreen';
+
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
+const useDeleteNoteById = (
+  await (isLocalDev
+    ? import('~/hooks/react-query/notes/__mocks__/useDeleteNoteById')
+    : import('~/hooks/react-query/notes/useDeleteNoteById'))
+).default;
 
 export default function DialogNoteDetailTrashed({
   noteEditor,

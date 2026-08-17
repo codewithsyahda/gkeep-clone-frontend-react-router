@@ -2,10 +2,21 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 import Spinner from '~/components/Spinner';
+import envConfig from '~/configs/envs';
 import SidebarContentAlertContainer from '~/routes/_components/SidebarContentAlertContainer';
 import ArchivedNoteCard from '../../_components/NoteCard/ArchivedNoteCard';
 
-import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
+const useGetNotes = (
+  await (isLocalDev
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
+    : import('~/hooks/react-query/notes/useGetNotes'))
+).default;
 
 export default function ArchivedNotesPageContent() {
   const { isFetchedAfterMount, data } = useGetNotes({

@@ -1,9 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
+import { delay } from 'msw';
 
 import envConfig from '~/configs/envs';
 import axiosInstance from '~/lib/http';
-import { type TUserEntity } from '~/tests/mocks/apis/fakeDB/users';
+import { UsersDB, type TUserEntity } from '~/tests/mocks/apis/fakeDB/users';
 import type { TSuccessResponse } from '~/types/http';
 
 const useSigninWithEmail = () => {
@@ -14,33 +15,59 @@ const useSigninWithEmail = () => {
         password: string;
       }>,
     ) => {
-      try {
-        const response = await axiosInstance.post(
-          `${envConfig.api.baseUrl}/auth/sign-in/email`,
-          payload,
-          {
-            withCredentials: true,
-          },
-        );
+      if (
+        envConfig.dev.mock.msw ||
+        import.meta.env.STORYBOOK === 'true' ||
+        import.meta.env.MODE === 'test'
+      ) {
+        try {
+          const response = await axiosInstance.post(
+            `${envConfig.api.baseUrl}/auth/sign-in/email`,
+            payload,
+            {
+              withCredentials: true,
+            },
+          );
 
-        const { user } = (
-          response.data as TSuccessResponse<{
-            user: Omit<TUserEntity, 'password'>;
-          }>
-        ).data;
+          const { user } = (
+            response.data as TSuccessResponse<{
+              user: Omit<TUserEntity, 'password'>;
+            }>
+          ).data;
 
-        return { data: user };
-      } catch (error) {
-        if (
-          isAxiosError<{
-            error: { message: string };
-          }>(error)
-        ) {
-          throw new Error(error.response?.data.error.message);
-        } else {
-          throw new Error('Failed to sign in');
+          return { data: user };
+        } catch (error) {
+          if (
+            isAxiosError<{
+              error: { message: string };
+            }>(error)
+          ) {
+            throw new Error(error.response?.data.error.message);
+          } else {
+            throw new Error('Failed to sign in');
+          }
         }
       }
+
+      await delay('real');
+
+      const { email, password } = payload;
+
+      const user = UsersDB.getAll().find(
+        (u) => u.email === email.toLowerCase() && u.password === password,
+      );
+
+      if (user) {
+        window.sessionStorage.setItem('auth.user_id', user.id);
+
+        const { password: _p, ...userResponseData } = user;
+
+        return {
+          data: userResponseData,
+        };
+      }
+
+      throw new Error('Invalid email or password');
     },
   });
 
