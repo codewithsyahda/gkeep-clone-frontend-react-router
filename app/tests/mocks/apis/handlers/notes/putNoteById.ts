@@ -6,7 +6,7 @@ import tiptapConfig from '~/configs/tiptap';
 import type { TMutateNoteRequest } from '~/types/models/notes';
 import { NotesDB } from '../../fakeDB/notes';
 
-const putNoteById = http.put<{ noteId: string }>(
+const putNoteByIdHandler = http.put<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
   async ({ request, params, cookies }) => {
     await delay('real');
@@ -113,4 +113,4 @@ const putNoteById = http.put<{ noteId: string }>(
   },
 );
 
-export default putNoteById;
+export default putNoteByIdHandler;

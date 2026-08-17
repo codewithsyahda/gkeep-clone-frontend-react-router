@@ -18,9 +18,9 @@ import {
   postNoteHandler,
   putNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
-import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
-import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
-import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
+import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
+import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
+import signOutHandler from '~/tests/mocks/apis/handlers/users/signOut';
 import NotePageLayoutContent from './NotePageLayoutContent';
 
 const meta = {

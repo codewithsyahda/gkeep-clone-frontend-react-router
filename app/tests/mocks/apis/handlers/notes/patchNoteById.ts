@@ -6,7 +6,7 @@ import tiptapConfig from '~/configs/tiptap';
 import type { TMutateNoteRequest } from '~/types/models/notes';
 import { NotesDB } from '../../fakeDB/notes';
 
-const patchNoteById = http.patch<{ noteId: string }>(
+const patchNoteByIdHandler = http.patch<{ noteId: string }>(
   `${envConfig.api.baseUrl}/notes/:noteId`,
   async ({ request, params, cookies }) => {
     await delay('real');
@@ -130,4 +130,4 @@ const patchNoteById = http.patch<{ noteId: string }>(
   },
 );
 
-export default patchNoteById;
+export default patchNoteByIdHandler;
