@@ -1,9 +1,14 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { type MouseEvent } from 'react';
 
-import usePatchNoteById from '~/hooks/react-query/notes/usePatchNoteById';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import type { TMutateNoteActions, TNoteStatus } from '~/types/models/notes';
+
+const usePatchNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePatchNoteById')
+    : import('~/hooks/react-query/notes/usePatchNoteById'))
+).default;
 
 const useUpdateNoteByIdMut = (noteId: string) => {
   const queryClient = useQueryClient();

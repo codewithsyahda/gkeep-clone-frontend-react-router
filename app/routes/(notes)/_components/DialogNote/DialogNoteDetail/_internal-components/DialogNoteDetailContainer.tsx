@@ -8,14 +8,39 @@ import DialogNoteDetailNonTrashed from './DialogNoteDetailNonTrashed';
 import DialogNoteDetailTrashed from './DialogNoteDetailTrashed';
 
 import BadRequestError from '~/exceptions/badRequestError';
-import usePatchContentNoteById from '~/hooks/react-query/notes/usePatchContentNoteById';
-import usePatchNoteById from '~/hooks/react-query/notes/usePatchNoteById';
-import usePutArchiveNoteById from '~/hooks/react-query/notes/usePutArchiveNoteById';
-import usePutTrashNoteById from '~/hooks/react-query/notes/usePutTrashNoteById';
-import usePutUnarchiveNoteById from '~/hooks/react-query/notes/usePutUnarchiveNoteById';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import type { TNoteStatus } from '~/types/models/notes';
 import useInputTitle from '../../_internal-hooks/useInputTitle';
+
+const usePatchContentNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePatchContentNoteById')
+    : import('~/hooks/react-query/notes/usePatchContentNoteById'))
+).default;
+
+const usePatchNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePatchNoteById')
+    : import('~/hooks/react-query/notes/usePatchNoteById'))
+).default;
+
+const usePutArchiveNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePutArchiveNoteById')
+    : import('~/hooks/react-query/notes/usePutArchiveNoteById'))
+).default;
+
+const usePutTrashNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePutTrashNoteById')
+    : import('~/hooks/react-query/notes/usePutTrashNoteById'))
+).default;
+
+const usePutUnarchiveNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePutUnarchiveNoteById')
+    : import('~/hooks/react-query/notes/usePutUnarchiveNoteById'))
+).default;
 
 export default function DialogNoteDetailContainer({
   noteEditor,

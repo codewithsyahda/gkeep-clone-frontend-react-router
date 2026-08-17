@@ -15,7 +15,11 @@ import ButtonOverlay from '~/components/ButtonOverlay';
 import Spinner from '~/components/Spinner';
 import DialogNoteDetailEditorInitializer from './_internal-components/DialogNoteDetailEditorInitializer';
 
-import useGetNoteById from '~/hooks/react-query/notes/useGetNoteById';
+const useGetNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNoteById')
+    : import('~/hooks/react-query/notes/useGetNoteById'))
+).default;
 
 export default function DialogNoteDetail() {
   const navigate = useNavigate();

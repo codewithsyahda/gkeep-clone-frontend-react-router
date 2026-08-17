@@ -15,10 +15,15 @@ import DialogNoteActionContainer from './_internal-components/DialogNoteActionCo
 import DialogNoteEditor from './_internal-components/DialogNoteEditor';
 
 import tiptapConfig from '~/configs/tiptap';
-import useCreateNote from '~/hooks/react-query/notes/useCreateNote';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import useDialogFullScreen from './_internal-hooks/useDialogFullScreen';
 import useInputTitle from './_internal-hooks/useInputTitle';
+
+const useCreateNote = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useCreateNote')
+    : import('~/hooks/react-query/notes/useCreateNote'))
+).default;
 
 function DialogCreateNoteEditor({
   noteEditor,

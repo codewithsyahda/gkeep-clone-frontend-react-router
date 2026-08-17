@@ -11,11 +11,21 @@ import { EllipsisVerticalIcon, XIcon } from 'lucide-react';
 import DialogConfirmation from '~/routes/(notes)/_components/DialogConfirmation';
 import AppTopIconButtonBase from './AppTopIconButtonBase';
 
-import useDeleteNoteByIds from '~/hooks/react-query/notes/useDeleteNoteByIds';
-import usePatchNoteById from '~/hooks/react-query/notes/usePatchNoteById';
 import useBoolean from '~/hooks/useBoolean';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
+
+const useDeleteNoteByIds = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useDeleteNoteByIds')
+    : import('~/hooks/react-query/notes/useDeleteNoteByIds'))
+).default;
+
+const usePatchNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/usePatchNoteById')
+    : import('~/hooks/react-query/notes/usePatchNoteById'))
+).default;
 
 export default function AppTopNotesSelectionBar() {
   const [anchorSelectionBtnElem, setAnchorSelectionBtnElem] =

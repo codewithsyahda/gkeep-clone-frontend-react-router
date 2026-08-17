@@ -13,11 +13,21 @@ import SidebarContentAlertContainer from '~/routes/_components/SidebarContentAle
 import DialogConfirmation from '../../_components/DialogConfirmation';
 import TrashedNoteCard from '../../_components/NoteCard/TrashedNoteCard';
 
-import useDeleteNotes from '~/hooks/react-query/notes/useDeleteNotes';
-import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
 import useBoolean from '~/hooks/useBoolean';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
+
+const useDeleteNotes = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useDeleteNotes')
+    : import('~/hooks/react-query/notes/useDeleteNotes'))
+).default;
+
+const useGetNotes = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
+    : import('~/hooks/react-query/notes/useGetNotes'))
+).default;
 
 export default function TrashNotesPageContent() {
   const queryClient = useQueryClient();

@@ -5,7 +5,11 @@ import Spinner from '~/components/Spinner';
 import SidebarContentAlertContainer from '~/routes/_components/SidebarContentAlertContainer';
 import ArchivedNoteCard from '../../_components/NoteCard/ArchivedNoteCard';
 
-import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
+const useGetNotes = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
+    : import('~/hooks/react-query/notes/useGetNotes'))
+).default;
 
 export default function ArchivedNotesPageContent() {
   const { isFetchedAfterMount, data } = useGetNotes({

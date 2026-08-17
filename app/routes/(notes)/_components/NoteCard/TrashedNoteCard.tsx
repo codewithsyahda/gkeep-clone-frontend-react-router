@@ -18,10 +18,15 @@ import ButtonLinkCardNoteAction from './_internal-components/ButtonLinkCardNoteA
 import NoteCardContainer from './_internal-components/NoteCardContainer';
 import NoteInfo from './_internal-components/NoteInfo';
 
-import useDeleteNoteById from '~/hooks/react-query/notes/useDeleteNoteById';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import useNoteInfo from './_internal-hooks/useNoteInfo';
 import useUpdateNoteByIdMut from './_internal-hooks/useUpdateNoteStatusByIdMut';
+
+const useDeleteNoteById = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useDeleteNoteById')
+    : import('~/hooks/react-query/notes/useDeleteNoteById'))
+).default;
 
 export default function TrashedNoteCard({
   noteId,

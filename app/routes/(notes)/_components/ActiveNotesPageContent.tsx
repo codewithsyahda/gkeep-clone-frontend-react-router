@@ -11,8 +11,13 @@ import SidebarContentAlertContainer from '../../_components/SidebarContentAlertC
 import DialogCreateNote from './../_components/DialogNote/DialogCreateNote';
 import ActiveNoteCard from './../_components/NoteCard/ActiveNoteCard';
 
-import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+
+const useGetNotes = (
+  await (import.meta.env.DEV
+    ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
+    : import('~/hooks/react-query/notes/useGetNotes'))
+).default;
 
 export default function ActiveNotesPageContent() {
   const { isFetchedAfterMount, data } = useGetNotes({
