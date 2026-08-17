@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from 'msw';
 import envConfig from '~/configs/envs';
 import { UsersDB } from '../../fakeDB/users';
 
-const sessionHandler = http.get(
+const getSessionHandler = http.get(
   `${envConfig.api.baseUrl}/auth/get-session`,
   async ({ cookies }) => {
     await delay('real');
@@ -67,4 +67,4 @@ const sessionHandler = http.get(
   },
 );
 
-export default sessionHandler;
+export default getSessionHandler;

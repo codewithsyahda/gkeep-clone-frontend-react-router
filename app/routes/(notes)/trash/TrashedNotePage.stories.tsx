@@ -13,9 +13,9 @@ import {
   putNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
-import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteByIdHandler';
-import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotesHandler';
-import signOutHandler from '~/tests/mocks/apis/handlers/users/signOutHandler';
+import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
+import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
+import signOutHandler from '~/tests/mocks/apis/handlers/users/signOut';
 import NotesPageLayoutContent from '../_components/NotePageLayoutContent/NotePageLayoutContent';
 import * as ActiveNotePageStories from '../ActiveNotePage.stories';
 import TrashedNotesPageContent from './_components/TrashedNotesPageContent';

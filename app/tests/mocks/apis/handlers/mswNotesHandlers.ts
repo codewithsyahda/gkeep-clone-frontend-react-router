@@ -1,25 +1,25 @@
-import deleteNoteByIdHandler from './notes/deleteNoteByIdHandler';
-import deleteNotesHandler from './notes/deleteNotesHandler';
-import getNoteByIdHandler from './notes/getNoteByIdHandler';
-import getNotesHandler from './notes/getNotesHandler';
-import patchNoteById from './notes/patchNoteById';
-import postNoteHandler from './notes/postNoteHandler';
-import putNoteById from './notes/putNoteById';
-import sessionHandler from './users/sessionHandler';
-import signInHandler from './users/signInHandler';
-import signOutHandler from './users/signOutHandler';
-import signUpHandler from './users/signUpHandler';
+import deleteNoteByIdHandler from './notes/deleteNoteById';
+import deleteNotesHandler from './notes/deleteNotes';
+import getNoteByIdHandler from './notes/getNoteById';
+import getNotesHandler from './notes/getNotes';
+import patchNoteByIdHandler from './notes/patchNoteById';
+import postNoteHandler from './notes/postNote';
+import putNoteByIdHandler from './notes/putNoteById';
+import getSessionHandler from './users/getSession';
+import signInEmailHandler from './users/signInEmail';
+import signOutHandler from './users/signOut';
+import signUpEmailHandler from './users/signUpEmail';
 
 export const mswNotesHandlers = [
-  sessionHandler,
-  signInHandler,
-  signUpHandler,
+  getSessionHandler,
+  signInEmailHandler,
+  signUpEmailHandler,
   signOutHandler,
   getNotesHandler,
   postNoteHandler,
   deleteNotesHandler,
   getNoteByIdHandler,
-  putNoteById,
-  patchNoteById,
+  putNoteByIdHandler,
+  patchNoteByIdHandler,
   deleteNoteByIdHandler,
 ];

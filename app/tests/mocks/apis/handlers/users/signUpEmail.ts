@@ -3,7 +3,7 @@ import { delay, http, HttpResponse } from 'msw';
 import envConfig from '~/configs/envs';
 import { UsersDB, type TUserEntity } from '../../fakeDB/users';
 
-const signUpHandler = http.post(
+const signUpEmailHandler = http.post(
   `${envConfig.api.baseUrl}/auth/sign-up/email`,
   async ({ request }) => {
     await delay('real');
@@ -69,4 +69,4 @@ const signUpHandler = http.post(
   },
 );
 
-export default signUpHandler;
+export default signUpEmailHandler;
