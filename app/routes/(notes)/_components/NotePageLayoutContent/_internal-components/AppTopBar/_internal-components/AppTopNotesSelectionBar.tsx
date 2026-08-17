@@ -11,18 +11,25 @@ import { EllipsisVerticalIcon, XIcon } from 'lucide-react';
 import DialogConfirmation from '~/routes/(notes)/_components/DialogConfirmation';
 import AppTopIconButtonBase from './AppTopIconButtonBase';
 
+import envConfig from '~/configs/envs';
 import useBoolean from '~/hooks/useBoolean';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const useDeleteNoteByIds = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/useDeleteNoteByIds')
     : import('~/hooks/react-query/notes/useDeleteNoteByIds'))
 ).default;
 
 const usePatchNoteById = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/usePatchNoteById')
     : import('~/hooks/react-query/notes/usePatchNoteById'))
 ).default;

@@ -13,10 +13,17 @@ import { FocusTrap } from 'focus-trap-react';
 
 import ButtonOverlay from '~/components/ButtonOverlay';
 import Spinner from '~/components/Spinner';
+import envConfig from '~/configs/envs';
 import DialogNoteDetailEditorInitializer from './_internal-components/DialogNoteDetailEditorInitializer';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const useGetNoteById = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/useGetNoteById')
     : import('~/hooks/react-query/notes/useGetNoteById'))
 ).default;

@@ -14,13 +14,20 @@ import ButtonDialogNoteAction from './_internal-components/ButtonDialogNoteActio
 import DialogNoteActionContainer from './_internal-components/DialogNoteActionContainer';
 import DialogNoteEditor from './_internal-components/DialogNoteEditor';
 
+import envConfig from '~/configs/envs';
 import tiptapConfig from '~/configs/tiptap';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import useDialogFullScreen from './_internal-hooks/useDialogFullScreen';
 import useInputTitle from './_internal-hooks/useInputTitle';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const useCreateNote = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/useCreateNote')
     : import('~/hooks/react-query/notes/useCreateNote'))
 ).default;

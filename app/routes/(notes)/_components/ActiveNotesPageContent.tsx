@@ -11,10 +11,17 @@ import SidebarContentAlertContainer from '../../_components/SidebarContentAlertC
 import DialogCreateNote from './../_components/DialogNote/DialogCreateNote';
 import ActiveNoteCard from './../_components/NoteCard/ActiveNoteCard';
 
+import envConfig from '~/configs/envs';
 import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const useGetNotes = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/useGetNotes')
     : import('~/hooks/react-query/notes/useGetNotes'))
 ).default;

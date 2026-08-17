@@ -18,12 +18,19 @@ import ButtonLinkCardNoteAction from './_internal-components/ButtonLinkCardNoteA
 import NoteCardContainer from './_internal-components/NoteCardContainer';
 import NoteInfo from './_internal-components/NoteInfo';
 
+import envConfig from '~/configs/envs';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import useNoteInfo from './_internal-hooks/useNoteInfo';
 import useUpdateNoteByIdMut from './_internal-hooks/useUpdateNoteStatusByIdMut';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const useDeleteNoteById = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/useDeleteNoteById')
     : import('~/hooks/react-query/notes/useDeleteNoteById'))
 ).default;

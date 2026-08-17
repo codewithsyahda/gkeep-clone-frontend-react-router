@@ -1,11 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { type MouseEvent } from 'react';
 
+import envConfig from '~/configs/envs';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import type { TMutateNoteActions, TNoteStatus } from '~/types/models/notes';
 
+const isLocalDev =
+  import.meta.env.DEV &&
+  !envConfig.dev.mock.msw &&
+  import.meta.env.STORYBOOK !== true &&
+  import.meta.env.MODE === 'development';
+
 const usePatchNoteById = (
-  await (import.meta.env.DEV
+  await (isLocalDev
     ? import('~/hooks/react-query/notes/__mocks__/usePatchNoteById')
     : import('~/hooks/react-query/notes/usePatchNoteById'))
 ).default;
