@@ -13,7 +13,7 @@ import {
   patchNoteByIdHandler,
   putNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
+import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import ActiveNotesPageContent from './ActiveNotesPageContent';
 
 const meta = {
@@ -31,11 +31,11 @@ const meta = {
     reactQueryDecorator,
     withRouter,
     (Story) => (
-      <SelectionNotesCtxProvider>
+      <NotesSelectionCtxProvider>
         <div className="h-[95dvh] w-[96vw]">
           <Story />
         </div>
-      </SelectionNotesCtxProvider>
+      </NotesSelectionCtxProvider>
     ),
   ],
 } satisfies Meta<typeof ActiveNotesPageContent>;

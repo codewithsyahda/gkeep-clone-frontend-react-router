@@ -1,10 +1,10 @@
 import type { Decorator } from '@storybook/react-vite';
 
+import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import {
-  SelectionNotesContext,
+  NotesSelectionContext,
   type TNotesSelectionContext,
 } from '~/contexts/reactContext';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
 
 const notesSelectionDecorator: Decorator = (Story, context) => {
   const mockedCtxValue =
@@ -20,7 +20,7 @@ const notesSelectionDecorator: Decorator = (Story, context) => {
 
   if (isMocked) {
     return (
-      <SelectionNotesContext
+      <NotesSelectionContext
         value={{
           notes: [],
           selectOne: () => {},
@@ -30,14 +30,14 @@ const notesSelectionDecorator: Decorator = (Story, context) => {
         }}
       >
         <Story />
-      </SelectionNotesContext>
+      </NotesSelectionContext>
     );
   }
 
   return (
-    <SelectionNotesCtxProvider>
+    <NotesSelectionCtxProvider>
       <Story />
-    </SelectionNotesCtxProvider>
+    </NotesSelectionCtxProvider>
   );
 };
 

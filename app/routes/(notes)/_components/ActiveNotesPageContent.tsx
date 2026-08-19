@@ -12,7 +12,7 @@ import DialogCreateNote from './../_components/DialogNote/DialogCreateNote';
 import ActiveNoteCard from './../_components/NoteCard/ActiveNoteCard';
 
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 
 export default function ActiveNotesPageContent() {
   const { isFetchedAfterMount, data } = useGetNotes({
@@ -34,7 +34,7 @@ export default function ActiveNotesPageContent() {
 
   const notes = data?.notes.active ?? [];
 
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
   return (
     <>
@@ -94,7 +94,7 @@ export default function ActiveNotesPageContent() {
           )}
         </>
       )}
-      {selectionNotesCtx.notes.length === 0 && (
+      {notesSelectionCtx.notes.length === 0 && (
         <ButtonLink
           variant="contained"
           to={{

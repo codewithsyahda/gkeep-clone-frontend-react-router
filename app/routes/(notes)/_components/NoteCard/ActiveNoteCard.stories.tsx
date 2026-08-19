@@ -12,7 +12,7 @@ import {
   patchNoteByIdLoadingHandler,
   patchNoteByIdServerErrorHandler,
 } from '.storybook/parameters/msw/notesHandlers';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
+import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import ActiveNoteCardComponent from './ActiveNoteCard';
 
 const meta = {
@@ -35,11 +35,11 @@ const meta = {
     (Story) => {
       return (
         <>
-          <SelectionNotesCtxProvider>
+          <NotesSelectionCtxProvider>
             <div className="min-w-70 md:min-w-sm">
               <Story />
             </div>
-          </SelectionNotesCtxProvider>
+          </NotesSelectionCtxProvider>
           <Toaster duration={Infinity} />
         </>
       );

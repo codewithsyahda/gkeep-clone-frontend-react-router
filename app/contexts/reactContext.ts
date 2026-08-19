@@ -17,6 +17,6 @@ export type TNotesSelectionContext = {
   unselectAll: () => void;
 };
 
-export const SelectionNotesContext = createContext<
+export const NotesSelectionContext = createContext<
   TNotesSelectionContext | undefined
 >(undefined);

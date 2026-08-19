@@ -1,9 +1,9 @@
 import { useMemo, useState, type ReactNode } from 'react';
 
 import type { TNoteStatus } from '~/types/models/notes';
-import { SelectionNotesContext } from './reactContext';
+import { NotesSelectionContext } from './reactContext';
 
-export default function SelectionNotesCtxProvider({
+export default function NotesSelectionCtxProvider({
   children,
 }: Readonly<{
   children: ReactNode;
@@ -43,6 +43,6 @@ export default function SelectionNotesCtxProvider({
   );
 
   return (
-    <SelectionNotesContext value={ctxValue}>{children}</SelectionNotesContext>
+    <NotesSelectionContext value={ctxValue}>{children}</NotesSelectionContext>
   );
 }

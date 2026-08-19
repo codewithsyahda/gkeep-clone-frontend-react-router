@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import AppTopMainBar from './_internal-components/AppTopMainBar';
 import AppTopNotesSelectionBar from './_internal-components/AppTopNotesSelectionBar';
 
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 
 export default function AppTopBar({
   isShowSidebar,
@@ -31,9 +31,9 @@ export default function AppTopBar({
   handleSearchNotes: ChangeEventHandler<HTMLInputElement>;
   handleSignOut: MouseEventHandler<HTMLButtonElement>;
 }>) {
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
-  const totalSelectionNotes = selectionNotesCtx.notes.length;
+  const totalNotesSelection = notesSelectionCtx.notes.length;
 
   return (
     <Box
@@ -48,7 +48,7 @@ export default function AppTopBar({
         position: 'relative',
       }}
     >
-      {totalSelectionNotes === 0 ? (
+      {totalNotesSelection === 0 ? (
         <AppTopMainBar
           isShowSidebar={isShowSidebar}
           isSigningOut={isSigningOut}

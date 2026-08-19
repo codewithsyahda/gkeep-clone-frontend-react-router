@@ -9,7 +9,7 @@ import OverlayScreen from '~/components/OverlayScreen';
 import SidebarLink from './SidebarLink';
 import SidebarLinkItem from './SidebarLinkItem';
 
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 
 const sidebarLinks = [
   {
@@ -38,7 +38,7 @@ export default function AppSidebarMenuContainer({
 }>) {
   const muiTheme = useTheme();
 
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
   useEffect(() => {
     const closeSidebarPageMobileNavigation = (ev: PointerEvent) => {
@@ -55,8 +55,8 @@ export default function AppSidebarMenuContainer({
         closeSidebar();
       }
 
-      if (appSidebarLinkElem && selectionNotesCtx.notes.length) {
-        selectionNotesCtx.unselectAll();
+      if (appSidebarLinkElem && notesSelectionCtx.notes.length) {
+        notesSelectionCtx.unselectAll();
       }
     };
 
@@ -65,7 +65,7 @@ export default function AppSidebarMenuContainer({
     return () => {
       document.removeEventListener('click', closeSidebarPageMobileNavigation);
     };
-  }, [closeSidebar, muiTheme.breakpoints.values.md, selectionNotesCtx]);
+  }, [closeSidebar, muiTheme.breakpoints.values.md, notesSelectionCtx]);
 
   return (
     <Box

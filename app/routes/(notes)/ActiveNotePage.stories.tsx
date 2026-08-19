@@ -11,7 +11,7 @@ import {
   postNoteHandler,
   putNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
-import SelectionNotesCtxProvider from '~/contexts/SelectionNotesCtxProvider';
+import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOut';
@@ -51,9 +51,9 @@ const meta = {
     );
 
     return (
-      <SelectionNotesCtxProvider>
+      <NotesSelectionCtxProvider>
         <RouterProvider router={router} />
-      </SelectionNotesCtxProvider>
+      </NotesSelectionCtxProvider>
     );
   },
 } satisfies Meta;
