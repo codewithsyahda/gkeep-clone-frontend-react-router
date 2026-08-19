@@ -11,7 +11,7 @@ import Typography from '@mui/material/Typography';
 
 import { FocusTrap } from 'focus-trap-react';
 
-import ButtonOverlay from '~/components/ButtonOverlay';
+import OverlayScreen from '~/components/OverlayScreen';
 import Spinner from '~/components/Spinner';
 import DialogNoteDetailEditorInitializer from './_internal-components/DialogNoteDetailEditorInitializer';
 
@@ -132,7 +132,7 @@ export default function DialogNoteDetail() {
               </Stack>
             </Paper>
           )}
-          <ButtonOverlay
+          <OverlayScreen
             onClick={handleCloseDialog}
             sx={{
               position: 'absolute',
@@ -143,7 +143,7 @@ export default function DialogNoteDetail() {
             }}
           >
             <span className="sr-only">Close dialog</span>
-          </ButtonOverlay>
+          </OverlayScreen>
         </Stack>
       </FocusTrap>
     );

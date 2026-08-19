@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 
-import ButtonOverlay from '~/components/ButtonOverlay';
+import OverlayScreen from '~/components/OverlayScreen';
 import SidebarLink from './SidebarLink';
 import SidebarLinkItem from './SidebarLinkItem';
 
@@ -149,7 +149,7 @@ export default function AppSidebarMenuContainer({
         ))}
       </Stack>
       {isShowSidebar && (
-        <ButtonOverlay
+        <OverlayScreen
           data-component="app-sidebar-overlay"
           aria-label="Close sidebar"
           onClick={() => closeSidebar()}
