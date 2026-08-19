@@ -10,7 +10,7 @@ on:
 
 jobs:
   playwright_test:
-    timeout-minutes: 120
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
