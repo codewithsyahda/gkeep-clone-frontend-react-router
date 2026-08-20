@@ -130,24 +130,6 @@ export default function NoteEditor({
     };
   }, [noteEditor.commands]);
 
-  useEffect(() => {
-    const inputTitleElem = inputTitleElemRef.current;
-
-    if (!inputTitleElem || disabledInputTitle) return;
-
-    inputTitleElem.focus();
-
-    const range = document.createRange();
-
-    range.selectNodeContents(inputTitleElem);
-    range.collapse(false);
-
-    const selection = window.getSelection();
-
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-  }, [disabledInputTitle]);
-
   return (
     <Box
       data-component="inputs-group-container"
