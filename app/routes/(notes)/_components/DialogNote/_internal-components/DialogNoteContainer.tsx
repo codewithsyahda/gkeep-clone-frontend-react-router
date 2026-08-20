@@ -61,13 +61,13 @@ export default function DialogNoteContainer({
           position: 'fixed',
           top: 0,
           left: 0,
-          height: '100dvh',
+          height: '100svh',
           width: '100%',
           zIndex: theme.zIndex.drawer + 1,
         })}
       >
         <Paper
-          data-component="container"
+          data-component="note-editor-container"
           ref={dialogPaperRef}
           elevation={2}
           style={
