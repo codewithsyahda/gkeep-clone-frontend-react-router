@@ -4,8 +4,10 @@ import Box from '@mui/material/Box';
 
 export default function Spinner({
   size = 20,
+  label,
 }: Readonly<{
   size?: number;
+  label?: string;
 }>) {
   return (
     <Box
@@ -20,6 +22,8 @@ export default function Spinner({
           },
         },
       }}
-    />
+    >
+      {label && <span className="sr-only">{label}</span>}
+    </Box>
   );
 }

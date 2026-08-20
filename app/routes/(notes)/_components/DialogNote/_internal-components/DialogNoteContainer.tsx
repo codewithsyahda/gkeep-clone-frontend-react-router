@@ -11,7 +11,7 @@ import Stack from '@mui/material/Stack';
 
 import { FocusTrap, type FocusTrapProps } from 'focus-trap-react';
 
-import ButtonOverlay from '~/components/ButtonOverlay';
+import OverlayScreen from '~/components/OverlayScreen';
 
 export default function DialogNoteContainer({
   type,
@@ -102,14 +102,14 @@ export default function DialogNoteContainer({
             </Box>
           </Stack>
         </Paper>
-        <ButtonOverlay
+        <OverlayScreen
           tabIndex={fullScreen ? -1 : undefined}
           ref={dialogOverlayRef}
           data-component="overlay"
           onClick={onClose}
         >
           <span className="sr-only">Close dialog</span>
-        </ButtonOverlay>
+        </OverlayScreen>
       </Stack>
     </FocusTrap>
   );

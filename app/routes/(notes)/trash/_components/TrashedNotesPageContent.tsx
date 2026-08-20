@@ -16,7 +16,7 @@ import TrashedNoteCard from '../../_components/NoteCard/TrashedNoteCard';
 import useDeleteNotes from '~/hooks/react-query/notes/useDeleteNotes';
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
 import useBoolean from '~/hooks/useBoolean';
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 
 export default function TrashNotesPageContent() {
@@ -75,7 +75,7 @@ export default function TrashNotesPageContent() {
     }
   };
 
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
   return (
     <>
@@ -151,7 +151,7 @@ export default function TrashNotesPageContent() {
                     ))}
                 </Grid>
               </Stack>
-              {selectionNotesCtx.notes.length === 0 && (
+              {notesSelectionCtx.notes.length === 0 && (
                 <Button
                   variant="contained"
                   onClick={() => setIsOpenDialogEmptyAll()}

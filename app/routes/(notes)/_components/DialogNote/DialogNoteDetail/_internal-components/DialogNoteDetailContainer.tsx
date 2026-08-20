@@ -7,7 +7,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import DialogNoteDetailNonTrashed from './DialogNoteDetailNonTrashed';
 import DialogNoteDetailTrashed from './DialogNoteDetailTrashed';
 
-import BadRequestError from '~/exceptions/badRequestError';
+import ValidationError from '~/exceptions/validationError';
 import usePatchContentNoteById from '~/hooks/react-query/notes/usePatchContentNoteById';
 import usePatchNoteById from '~/hooks/react-query/notes/usePatchNoteById';
 import usePutArchiveNoteById from '~/hooks/react-query/notes/usePutArchiveNoteById';
@@ -63,7 +63,7 @@ export default function DialogNoteDetailContainer({
     if (patchContentNoteById.isPending) return;
 
     if (titleValue.length > 128) {
-      throw new BadRequestError('Title must not more than 128 chars');
+      throw new ValidationError('Title must not more than 128 chars');
     }
 
     try {
@@ -81,7 +81,7 @@ export default function DialogNoteDetailContainer({
     } catch (error) {
       let alertText: string;
 
-      if (error instanceof BadRequestError) {
+      if (error instanceof ValidationError) {
         alertText = error.message;
       } else {
         alertText = 'Updating note failed';

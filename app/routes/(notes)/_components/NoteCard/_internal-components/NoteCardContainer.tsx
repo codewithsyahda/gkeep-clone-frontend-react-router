@@ -18,7 +18,7 @@ import Typography from '@mui/material/Typography';
 import { useTheme } from '@mui/material/styles';
 
 import tiptapConfig from '~/configs/tiptap';
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 import type { TNoteStatus } from '~/types/models/notes';
 
 export default function NoteCardContainer({
@@ -36,11 +36,11 @@ export default function NoteCardContainer({
   isTrashed?: boolean;
   actionSection: ReactNode;
 }>) {
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
-  const isSelected = selectionNotesCtx.notes.some((n) => n.noteId === noteId);
+  const isSelected = notesSelectionCtx.notes.some((n) => n.noteId === noteId);
 
-  const totalSelectionNotes = selectionNotesCtx.notes.length;
+  const totalNotesSelection = notesSelectionCtx.notes.length;
 
   const selectionTmRef = useRef<NodeJS.Timeout>(null);
 
@@ -52,7 +52,7 @@ export default function NoteCardContainer({
     ev,
   ) => {
     if (document.documentElement.clientWidth < muiTheme.breakpoints.values.sm) {
-      if (!isSelected && totalSelectionNotes === 0) {
+      if (!isSelected && totalNotesSelection === 0) {
         try {
           ev.currentTarget.setPointerCapture(ev.pointerId);
         } catch (error) {
@@ -61,7 +61,7 @@ export default function NoteCardContainer({
         }
 
         selectionTmRef.current = setTimeout(() => {
-          selectionNotesCtx.selectOne({
+          notesSelectionCtx.selectOne({
             noteId,
             noteStatus,
             isTrashed,
@@ -95,14 +95,14 @@ export default function NoteCardContainer({
 
       if (isFirstNoteSelection) {
         isFirstNoteSelectionRef.current = false;
-      } else if (!isSelected && totalSelectionNotes) {
-        selectionNotesCtx.selectOne({
+      } else if (!isSelected && totalNotesSelection) {
+        notesSelectionCtx.selectOne({
           noteId,
           noteStatus,
           isTrashed,
         });
       } else {
-        setTimeout(() => selectionNotesCtx.unselectOne(noteId), 100);
+        setTimeout(() => notesSelectionCtx.unselectOne(noteId), 100);
       }
 
       const selectionTm = selectionTmRef.current;
@@ -123,14 +123,14 @@ export default function NoteCardContainer({
       if (
         !evTarget.closest('[data-component="note-card-selection-checkbox"]')
       ) {
-        if (!isSelected && totalSelectionNotes) {
-          selectionNotesCtx.selectOne({
+        if (!isSelected && totalNotesSelection) {
+          notesSelectionCtx.selectOne({
             noteId,
             noteStatus,
             isTrashed,
           });
         } else {
-          selectionNotesCtx.unselectOne(noteId);
+          notesSelectionCtx.unselectOne(noteId);
         }
       }
     }
@@ -164,9 +164,9 @@ export default function NoteCardContainer({
 
   const handleNoteSelectionCheckbox = () => {
     if (isSelected) {
-      selectionNotesCtx.unselectOne(noteId);
+      notesSelectionCtx.unselectOne(noteId);
     } else {
-      selectionNotesCtx.selectOne({
+      notesSelectionCtx.selectOne({
         noteId,
         noteStatus,
         isTrashed,
@@ -207,7 +207,7 @@ export default function NoteCardContainer({
         }}
         style={
           {
-            '--opacityIsSelected': totalSelectionNotes ? '100%' : '0%',
+            '--opacityIsSelected': totalNotesSelection ? '100%' : '0%',
           } as CSSProperties
         }
         sx={{
@@ -230,7 +230,7 @@ export default function NoteCardContainer({
         data-component="note-card-selection-overlay"
         style={
           {
-            '--displayIsSelected': totalSelectionNotes ? 'initial' : 'none',
+            '--displayIsSelected': totalNotesSelection ? 'initial' : 'none',
           } as CSSProperties
         }
         sx={{
@@ -259,8 +259,8 @@ export default function NoteCardContainer({
           tabIndex={0}
           style={
             {
-              '--overflowYIsSelected': totalSelectionNotes ? 'hidden' : 'auto',
-              '--userSelectIsSelectedMd': totalSelectionNotes ? 'none' : 'auto',
+              '--overflowYIsSelected': totalNotesSelection ? 'hidden' : 'auto',
+              '--userSelectIsSelectedMd': totalNotesSelection ? 'none' : 'auto',
             } as CSSProperties
           }
           sx={{
@@ -311,7 +311,7 @@ export default function NoteCardContainer({
             </Box>
           </Stack>
         </Box>
-        {totalSelectionNotes === 0 && <Box>{actionSection}</Box>}
+        {totalNotesSelection === 0 && <Box>{actionSection}</Box>}
       </Stack>
     </Paper>
   );

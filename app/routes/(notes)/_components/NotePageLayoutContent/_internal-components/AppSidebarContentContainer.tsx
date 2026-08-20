@@ -12,7 +12,7 @@ import ActiveNoteCard from '../../NoteCard/ActiveNoteCard';
 import ArchivedNoteCard from '../../NoteCard/ArchivedNoteCard';
 
 import useGetNotes from '~/hooks/react-query/notes/useGetNotes';
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 
 export default function AppSidebarContentContainer({
   searchNotesQuery,
@@ -40,7 +40,7 @@ export default function AppSidebarContentContainer({
   const searchedNotesEmpty =
     searchedActiveNotes?.length === 0 && searchedArchivedNotes?.length === 0;
 
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
   const appSidebarContentContainerRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +56,7 @@ export default function AppSidebarContentContainer({
         evTarget.closest('[data-component="app-sidebar-content-container"]') &&
         !evTarget.closest('[data-component="note-card-container"]')
       ) {
-        setTimeout(() => selectionNotesCtx.unselectAll(), 100);
+        setTimeout(() => notesSelectionCtx.unselectAll(), 100);
       }
     };
 
@@ -65,7 +65,7 @@ export default function AppSidebarContentContainer({
     return () => {
       document.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [selectionNotesCtx]);
+  }, [notesSelectionCtx]);
 
   return (
     <Box

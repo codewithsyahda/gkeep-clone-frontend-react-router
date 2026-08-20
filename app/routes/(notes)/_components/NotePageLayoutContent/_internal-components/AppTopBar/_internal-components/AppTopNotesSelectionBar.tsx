@@ -14,7 +14,7 @@ import AppTopIconButtonBase from './AppTopIconButtonBase';
 import useDeleteNoteByIds from '~/hooks/react-query/notes/useDeleteNoteByIds';
 import usePatchNoteById from '~/hooks/react-query/notes/usePatchNoteById';
 import useBoolean from '~/hooks/useBoolean';
-import useSelectionNotesCtx from '~/hooks/useSelectionNotesCtx';
+import useNotesSelectionCtx from '~/hooks/useNotesSelectionCtx';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 
 export default function AppTopNotesSelectionBar() {
@@ -29,21 +29,21 @@ export default function AppTopNotesSelectionBar() {
     setAnchorSelectionBtnElem(null);
   };
 
-  const selectionNotesCtx = useSelectionNotesCtx();
+  const notesSelectionCtx = useNotesSelectionCtx();
 
   const isSelectedTrashedNotes =
-    selectionNotesCtx.notes.filter((n) => n.isTrashed).length > 0;
+    notesSelectionCtx.notes.filter((n) => n.isTrashed).length > 0;
 
   const isSelectedActiveNotes =
     !isSelectedTrashedNotes &&
-    selectionNotesCtx.notes.filter((n) => n.noteStatus === 'active').length > 0;
+    notesSelectionCtx.notes.filter((n) => n.noteStatus === 'active').length > 0;
 
   const isSelectedArchivedNotes =
     !isSelectedTrashedNotes &&
-    selectionNotesCtx.notes.filter((n) => n.noteStatus === 'archived').length >
+    notesSelectionCtx.notes.filter((n) => n.noteStatus === 'archived').length >
       0;
 
-  const totalSelectionNotes = selectionNotesCtx.notes.length;
+  const totalNotesSelection = notesSelectionCtx.notes.length;
 
   const queryClient = useQueryClient();
 
@@ -69,46 +69,46 @@ export default function AppTopNotesSelectionBar() {
 
     if (actionName === 'archive') {
       alertTextSuccess =
-        totalSelectionNotes > 1
-          ? `${totalSelectionNotes} notes archived`
+        totalNotesSelection > 1
+          ? `${totalNotesSelection} notes archived`
           : 'Note archived';
       alertTextError =
-        totalSelectionNotes > 1
-          ? `Archiving${totalSelectionNotes} notes failed`
+        totalNotesSelection > 1
+          ? `Archiving${totalNotesSelection} notes failed`
           : 'Archiving note failed';
     } else if (actionName === 'unarchive') {
       alertTextSuccess =
-        totalSelectionNotes > 1
-          ? `${totalSelectionNotes} notes unarchive`
+        totalNotesSelection > 1
+          ? `${totalNotesSelection} notes unarchive`
           : 'Note unarchive';
       alertTextError =
-        totalSelectionNotes > 1
-          ? `Unarchiving ${totalSelectionNotes} notes failed`
+        totalNotesSelection > 1
+          ? `Unarchiving ${totalNotesSelection} notes failed`
           : 'Unarchive note failed';
     } else if (actionName === 'trash') {
       alertTextSuccess =
-        totalSelectionNotes > 1
-          ? `${totalSelectionNotes} notes trashed`
+        totalNotesSelection > 1
+          ? `${totalNotesSelection} notes trashed`
           : 'Note trashed';
       alertTextError =
-        totalSelectionNotes > 1
-          ? `Trashing ${totalSelectionNotes} notes failed`
+        totalNotesSelection > 1
+          ? `Trashing ${totalNotesSelection} notes failed`
           : 'Trashing note failed';
     } else {
       alertTextSuccess =
-        totalSelectionNotes > 1
-          ? `${totalSelectionNotes} notes restored`
+        totalNotesSelection > 1
+          ? `${totalNotesSelection} notes restored`
           : 'Note restored';
       alertTextError =
-        totalSelectionNotes > 1
-          ? `Restoring ${totalSelectionNotes} notes failed`
+        totalNotesSelection > 1
+          ? `Restoring ${totalNotesSelection} notes failed`
           : 'Restoring note failed';
     }
 
     try {
       if (actionName === 'archive' || actionName === 'unarchive') {
         await Promise.all(
-          selectionNotesCtx.notes.map((n) =>
+          notesSelectionCtx.notes.map((n) =>
             patchNoteByIdMut.mutateAsync({
               noteId: n.noteId,
               data: {
@@ -119,7 +119,7 @@ export default function AppTopNotesSelectionBar() {
         );
       } else {
         await Promise.all(
-          selectionNotesCtx.notes.map((n) =>
+          notesSelectionCtx.notes.map((n) =>
             patchNoteByIdMut.mutateAsync({
               noteId: n.noteId,
               data: { isTrashed: actionName === 'trash' },
@@ -140,7 +140,7 @@ export default function AppTopNotesSelectionBar() {
 
     setAnchorSelectionBtnElem(null);
 
-    selectionNotesCtx.unselectAll();
+    notesSelectionCtx.unselectAll();
 
     queryClient.invalidateQueries({
       queryKey: ['notes'],
@@ -156,21 +156,21 @@ export default function AppTopNotesSelectionBar() {
   const handleDeleteSelectedNotes = async () => {
     try {
       await deleteNoteByIdsMut.mutateAsync(
-        selectionNotesCtx.notes.map((n) => n.noteId),
+        notesSelectionCtx.notes.map((n) => n.noteId),
       );
 
       emitSnackbarAlert({
         alertText:
-          totalSelectionNotes > 1
-            ? `${totalSelectionNotes} notes deleted`
+          totalNotesSelection > 1
+            ? `${totalNotesSelection} notes deleted`
             : 'Note deleted',
         alertSeverity: 'success',
       });
     } catch {
       emitSnackbarAlert({
         alertText:
-          totalSelectionNotes > 1
-            ? `Deleting ${totalSelectionNotes} notes failed`
+          totalNotesSelection > 1
+            ? `Deleting ${totalNotesSelection} notes failed`
             : 'Deleting note failed',
         alertSeverity: 'error',
       });
@@ -178,7 +178,7 @@ export default function AppTopNotesSelectionBar() {
 
     setCloseDialogDeleteSelectedNotes();
 
-    selectionNotesCtx.unselectAll();
+    notesSelectionCtx.unselectAll();
 
     setAnchorSelectionBtnElem(null);
 
@@ -206,7 +206,7 @@ export default function AppTopNotesSelectionBar() {
         >
           <div>
             <AppTopIconButtonBase
-              onClick={selectionNotesCtx.unselectAll}
+              onClick={notesSelectionCtx.unselectAll}
               sx={{
                 p: 2,
               }}
@@ -217,7 +217,7 @@ export default function AppTopNotesSelectionBar() {
             </AppTopIconButtonBase>
           </div>
           <Typography variant="h6" component="p">
-            {totalSelectionNotes} selected
+            {totalNotesSelection} selected
           </Typography>
         </Stack>
         <div>
@@ -314,8 +314,8 @@ export default function AppTopNotesSelectionBar() {
       <DialogConfirmation
         title="Are you sure?"
         content={
-          totalSelectionNotes > 1
-            ? `The ${totalSelectionNotes} notes will be permanently deleted`
+          totalNotesSelection > 1
+            ? `The ${totalNotesSelection} notes will be permanently deleted`
             : 'The note will be permanently deleted.'
         }
         slotProps={{
