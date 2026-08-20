@@ -74,6 +74,14 @@ const patchNoteByIdHandler = http.patch<{ noteId: string }>(
 
     const targetedNote = notes[targetedNoteIdx];
 
+    if (
+      (title !== null &&
+        title.trim().replaceAll(/\s+/g, ' ') !== targetedNote.title) ||
+      (jsonContent !== null && jsonContent !== targetedNote.jsonContent)
+    ) {
+      targetedNote.updatedAt = new Date().toISOString();
+    }
+
     if (title !== null) {
       targetedNote.title = title.trim().replaceAll(/\s+/g, ' ') || 'Untitled';
     }
@@ -87,14 +95,6 @@ const patchNoteByIdHandler = http.patch<{ noteId: string }>(
       )
         .trim()
         .replaceAll(/\s+/g, ' ');
-    }
-
-    if (
-      (title !== null &&
-        title.trim().replaceAll(/\s+/g, ' ') !== targetedNote.title) ||
-      (jsonContent !== null && jsonContent !== targetedNote.jsonContent)
-    ) {
-      targetedNote.updatedAt = new Date().toISOString();
     }
 
     if (status === 'active') {
