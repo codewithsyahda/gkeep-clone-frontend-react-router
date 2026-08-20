@@ -29,7 +29,10 @@ export default function DialogNoteContainer({
   fullScreen: boolean;
   focusTrapProps?: {
     active?: boolean;
-    focusTrapOpts?: FocusTrapProps['focusTrapOptions'];
+    focusTrapOpts?: Omit<
+      Exclude<FocusTrapProps['focusTrapOptions'], undefined>,
+      'escapeDeactivates'
+    >;
   };
   bodySection: ReactNode;
   actionSection: ReactNode;

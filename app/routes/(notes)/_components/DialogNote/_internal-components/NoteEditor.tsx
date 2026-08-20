@@ -16,13 +16,13 @@ export default function NoteEditor({
   noteEditor,
   titleValue,
   disabledInputTitle,
-  rootRef,
+  ref,
   onInputTitle,
 }: Readonly<{
   noteEditor: Editor;
   titleValue: string;
   disabledInputTitle?: boolean;
-  rootRef?: RefObject<HTMLDivElement | null>;
+  ref?: RefObject<HTMLDivElement | null>;
   onInputTitle: (value: string) => void;
 }>) {
   const handleInputTitle: FormEventHandler<HTMLDivElement> = (ev) => {
@@ -133,7 +133,7 @@ export default function NoteEditor({
   return (
     <Box
       data-component="inputs-group-container"
-      ref={rootRef}
+      ref={ref}
       sx={{
         flex: 1,
         overflowY: 'auto',

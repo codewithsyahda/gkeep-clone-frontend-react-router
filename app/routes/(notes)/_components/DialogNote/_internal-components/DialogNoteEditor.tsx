@@ -149,7 +149,7 @@ export default function DialogNoteEditor({
             noteEditor={noteEditor}
             titleValue={titleValue}
             onInputTitle={onInputTitle}
-            rootRef={dialogInputsGroupRef}
+            ref={dialogInputsGroupRef}
           />
           <NoteFormattingTools
             dialogFmtMenuRef={dialogFmtMenuRef}
