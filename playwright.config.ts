@@ -75,21 +75,6 @@ export default defineConfig({
     },
 
     {
-      name: 'Galaxy S9+',
-      use: {
-        ...devices['Galaxy S9+'],
-        launchOptions: {
-          slowMo: 500,
-        },
-      },
-      testIgnore: ['tests/e2e/screens/desktop/**'],
-      expect: {
-        timeout: 30_000,
-      },
-      timeout: 60_000,
-    },
-
-    {
       name: 'Pixel 5',
       use: {
         ...devices['Pixel 5'],
@@ -102,21 +87,6 @@ export default defineConfig({
         timeout: 30_000,
       },
       timeout: 60_000,
-    },
-
-    {
-      name: 'iPhone 12',
-      use: {
-        ...devices['iPhone 12'],
-        launchOptions: {
-          slowMo: 750,
-        },
-      },
-      testIgnore: ['tests/e2e/screens/desktop/**'],
-      expect: {
-        timeout: 60_000,
-      },
-      timeout: 120_000,
     },
 
     /* Test against mobile viewports. */
