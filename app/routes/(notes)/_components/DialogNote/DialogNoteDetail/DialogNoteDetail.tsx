@@ -1,7 +1,7 @@
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useLocation, useNavigate, useSearchParams } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,7 +17,11 @@ import DialogNoteDetailEditorInitializer from './_internal-components/DialogNote
 
 import useGetNoteById from '~/hooks/react-query/notes/useGetNoteById';
 
-export default function DialogNoteDetail() {
+export default function DialogNoteDetail({
+  onClose,
+}: Readonly<{
+  onClose: () => void;
+}>) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,21 +36,9 @@ export default function DialogNoteDetail() {
     },
   });
 
-  const [searchParams] = useSearchParams();
-
-  const searchNotesQuery = searchParams.get('search-notes') || '';
-
-  const handleCloseDialog = () =>
-    navigate({
-      hash: '',
-      search: searchNotesQuery
-        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
-        : '',
-    });
-
   const errorResponse = error as AxiosError | null;
 
-  useHotkeys('escape', handleCloseDialog, {
+  useHotkeys('escape', onClose, {
     enableOnFormTags: ['textbox'],
     enableOnContentEditable: true,
   });
@@ -121,7 +113,7 @@ export default function DialogNoteDetail() {
                   {errorResponse.status === 500 && 'Something went wrong'}
                 </Typography>
                 <Button
-                  onClick={handleCloseDialog}
+                  onClick={onClose}
                   sx={{
                     alignSelf: 'center',
                     maxWidth: 'max-content',
@@ -133,7 +125,7 @@ export default function DialogNoteDetail() {
             </Paper>
           )}
           <OverlayScreen
-            onClick={handleCloseDialog}
+            onClick={onClose}
             sx={{
               position: 'absolute',
               top: 0,
@@ -165,6 +157,7 @@ export default function DialogNoteDetail() {
       noteStatus={archivedAt ? 'archived' : 'active'}
       isTrashed={!!trashedAt}
       updatedAt={updatedAt}
+      onClose={onClose}
     />
   );
 }

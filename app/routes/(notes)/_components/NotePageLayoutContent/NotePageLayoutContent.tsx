@@ -158,6 +158,14 @@ export default function NotesPageLayoutContent() {
     sessionData,
   ]);
 
+  const handleCloseDialog = () =>
+    navigate({
+      hash: '',
+      search: searchNotesQuery
+        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
+        : '',
+    });
+
   if (session.isPending || mutSignout.isSuccess || !sessionData) return null;
 
   const dialogName = location.hash.slice(1).split('/')[0].toLowerCase();
@@ -165,7 +173,9 @@ export default function NotesPageLayoutContent() {
 
   return (
     <>
-      {isOpenDialogNoteDetail && <DialogNoteDetail />}
+      {isOpenDialogNoteDetail && (
+        <DialogNoteDetail onClose={handleCloseDialog} />
+      )}
       <AppTopBar
         isShowSidebar={isShowSidebar}
         isSigningOut={mutSignout.isPending}

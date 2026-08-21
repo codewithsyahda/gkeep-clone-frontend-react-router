@@ -24,6 +24,7 @@ export default function DialogNoteDetailContainer({
   noteStatus,
   isTrashed,
   updatedAt,
+  onClose,
 }: Readonly<{
   noteEditor: Editor;
   noteId: string;
@@ -31,6 +32,7 @@ export default function DialogNoteDetailContainer({
   noteStatus: TNoteStatus;
   isTrashed: boolean;
   updatedAt: string;
+  onClose: () => void;
 }>) {
   const putArchiveNoteMut = usePutArchiveNoteById();
   const putUnarchiveNoteMut = usePutUnarchiveNoteById();
@@ -47,13 +49,7 @@ export default function DialogNoteDetailContainer({
 
   const handleCloseDialog = async () => {
     if (patchContentNoteById.isPending) return;
-
-    navigate({
-      hash: '',
-      search: searchNotesQuery
-        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
-        : '',
-    });
+    onClose();
   };
 
   const updateContentNoteResetTm =
@@ -156,12 +152,7 @@ export default function DialogNoteDetailContainer({
       )
         return;
 
-      await navigate({
-        hash: '',
-        search: searchNotesQuery
-          ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
-          : '',
-      });
+      onClose();
 
       let alertText: string;
       let undoUpdatedStatus = noteStatus;

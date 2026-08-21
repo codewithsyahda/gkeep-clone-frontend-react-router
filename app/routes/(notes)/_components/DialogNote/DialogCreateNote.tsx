@@ -3,7 +3,6 @@ import { Editor, useEditor } from '@tiptap/react';
 import { clsx } from 'clsx';
 import { Maximize, SaveIcon, XIcon } from 'lucide-react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -22,10 +21,11 @@ import useInputTitle from './_internal-hooks/useInputTitle';
 
 function DialogCreateNoteEditor({
   noteEditor,
+  onClose,
 }: Readonly<{
   noteEditor: Editor;
+  onClose: () => void;
 }>) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const createNoteMut = useCreateNote();
@@ -35,7 +35,7 @@ function DialogCreateNoteEditor({
 
   const handleCloseDialog = () => {
     if (createNoteMut.isPending || createNoteMut.isSuccess) return;
-    navigate({ hash: '' });
+    onClose();
   };
 
   const handleSaveNote = async () => {
@@ -47,7 +47,7 @@ function DialogCreateNoteEditor({
         jsonContent: JSON.stringify(noteEditor.getJSON()),
       });
 
-      await navigate({ hash: '' });
+      onClose();
 
       emitSnackbarAlert({
         alertText: 'Note created',
@@ -128,7 +128,11 @@ function DialogCreateNoteEditor({
   );
 }
 
-export default function DialogCreateNote() {
+export default function DialogCreateNote({
+  onClose,
+}: Readonly<{
+  onClose: () => void;
+}>) {
   const noteEditor = useEditor({
     extensions: tiptapConfig.extensions,
     immediatelyRender: false,
@@ -143,5 +147,5 @@ export default function DialogCreateNote() {
 
   if (!noteEditor) return null;
 
-  return <DialogCreateNoteEditor noteEditor={noteEditor} />;
+  return <DialogCreateNoteEditor noteEditor={noteEditor} onClose={onClose} />;
 }
