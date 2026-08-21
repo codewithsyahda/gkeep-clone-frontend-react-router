@@ -49,8 +49,12 @@ export default function DialogNoteDetail({
    * path is /notes/ without a note ID.
    */
   useEffect(() => {
-    if (!noteId) navigate({ hash: '' });
-  }, [navigate, noteId]);
+    if (!noteId)
+      navigate({
+        hash: '',
+        search: location.search,
+      });
+  }, [location.search, navigate, noteId]);
 
   if (!noteId) return null;
 
