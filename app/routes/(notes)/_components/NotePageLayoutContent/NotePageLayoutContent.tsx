@@ -161,9 +161,7 @@ export default function NotesPageLayoutContent() {
   const handleCloseDialog = () =>
     navigate({
       hash: '',
-      search: searchNotesQuery
-        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
-        : '',
+      search: location.search,
     });
 
   if (session.isPending || mutSignout.isSuccess || !sessionData) return null;
