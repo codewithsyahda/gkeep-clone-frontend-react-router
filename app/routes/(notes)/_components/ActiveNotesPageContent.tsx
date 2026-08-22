@@ -38,7 +38,8 @@ export default function ActiveNotesPageContent() {
 
   const navigate = useNavigate();
 
-  const handleCloseDialog = () => navigate({ hash: '' });
+  const handleCloseDialog = () =>
+    navigate({ hash: '', search: location.search });
 
   return (
     <>
@@ -105,6 +106,7 @@ export default function ActiveNotesPageContent() {
           variant="contained"
           to={{
             hash: '#create',
+            search: location.search,
           }}
           startIcon={
             <Box
