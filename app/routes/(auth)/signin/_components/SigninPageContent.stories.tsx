@@ -10,10 +10,8 @@ import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  getInvalidSessionHandler,
-  signInClientErrorHandler,
-  signInLoadingHandler,
-  signInServerErrorHandler,
+  mockGetSessionHandler,
+  mockSignInHandler,
 } from '.storybook/parameters/msw/authHandlers';
 import envConfig from '~/configs/envs';
 import SigninPageContentComponent from './SigninPageContent';
@@ -24,7 +22,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [getInvalidSessionHandler],
+      handlers: [mockGetSessionHandler({ errorStatus: '401' })],
     },
     reactRouter: reactRouterParameters({
       location: {
@@ -103,7 +101,10 @@ export const SigningIn: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signInLoadingHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignInHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -263,7 +264,10 @@ export const SigninClientError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signInClientErrorHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignInHandler({ errorStatus: '401' }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -316,7 +320,10 @@ export const SigninServerError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signInServerErrorHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignInHandler({ errorStatus: '500' }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {

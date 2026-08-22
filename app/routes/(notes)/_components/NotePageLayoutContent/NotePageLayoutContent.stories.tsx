@@ -9,7 +9,7 @@ import { expect, screen, waitFor } from 'storybook/test';
 import notesSelectionDecorator from '.storybook/decorators/notesSelection';
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  getSessionHandler,
+  mockGetSessionHandler,
   signOutLoadingHandler,
 } from '.storybook/parameters/msw/authHandlers';
 import {
@@ -53,7 +53,7 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getNotesHandler,
         postNoteHandler,
         getNoteByIdHandler,
@@ -122,7 +122,7 @@ export const ActiveNotesSelectionBar: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getEmptyNotesHandler,
         patchNoteByIdHandler,
         signOutHandler,
@@ -311,7 +311,7 @@ export const ArchivedNotesSelectionBar: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getEmptyNotesHandler,
         patchNoteByIdHandler,
         signOutHandler,
@@ -500,7 +500,7 @@ export const NonTrashedNotesSelectionBar: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getEmptyNotesHandler,
         patchNoteByIdHandler,
         signOutHandler,
@@ -1369,7 +1369,11 @@ export const MatchedSearchNotesResult: Story = {
 export const SigningOut: Story = {
   parameters: {
     msw: {
-      handlers: [getSessionHandler, getNotesHandler, signOutLoadingHandler],
+      handlers: [
+        mockGetSessionHandler(),
+        getNotesHandler,
+        signOutLoadingHandler,
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {

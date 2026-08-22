@@ -4,7 +4,7 @@ import { Toaster } from 'sonner';
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import { getSessionHandler } from '.storybook/parameters/msw/authHandlers';
+import { mockGetSessionHandler } from '.storybook/parameters/msw/authHandlers';
 import {
   deleteNoteByIdHandler,
   deleteNotesHandler,
@@ -70,7 +70,7 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getNotesHandler,
         getNoteByIdHandler,
         putNoteByIdHandler,
@@ -86,7 +86,7 @@ export const Default: Story = {
 export const EmptyNotes: Story = {
   parameters: {
     msw: {
-      handlers: [getSessionHandler, getEmptyNotesHandler, signOutHandler],
+      handlers: [mockGetSessionHandler(), getEmptyNotesHandler, signOutHandler],
     },
   },
 };
