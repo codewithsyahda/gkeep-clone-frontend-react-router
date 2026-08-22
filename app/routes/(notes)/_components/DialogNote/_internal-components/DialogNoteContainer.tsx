@@ -1,4 +1,5 @@
 import {
+  useEffect,
   type CSSProperties,
   type MouseEventHandler,
   type ReactNode,
@@ -16,6 +17,7 @@ import OverlayScreen from '~/components/OverlayScreen';
 export default function DialogNoteContainer({
   type,
   fullScreen,
+  isTrashed,
   focusTrapProps,
   bodySection,
   actionSection,
@@ -27,11 +29,12 @@ export default function DialogNoteContainer({
 }: Readonly<{
   type: 'create-note' | 'detail-note';
   fullScreen: boolean;
+  isTrashed?: boolean;
   focusTrapProps?: {
     active?: boolean;
     focusTrapOpts?: Omit<
       Exclude<FocusTrapProps['focusTrapOptions'], undefined>,
-      'escapeDeactivates'
+      'escapeDeactivates' | 'initialFocus' | 'fallbackFocus'
     >;
   };
   bodySection: ReactNode;
@@ -42,11 +45,18 @@ export default function DialogNoteContainer({
   dialogActionsRef?: RefObject<HTMLDivElement | null>;
   dialogOverlayRef?: RefObject<HTMLButtonElement | null>;
 }>) {
+  useEffect(() => {
+    if (isTrashed) {
+      dialogOverlayRef?.current?.focus();
+    }
+  }, [dialogOverlayRef, isTrashed]);
+
   return (
     <FocusTrap
       active={focusTrapProps?.active}
       focusTrapOptions={{
         ...focusTrapProps?.focusTrapOpts,
+        initialFocus: false,
         escapeDeactivates: false,
       }}
     >

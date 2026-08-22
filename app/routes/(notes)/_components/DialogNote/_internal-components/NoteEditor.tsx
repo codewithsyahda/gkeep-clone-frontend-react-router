@@ -130,22 +130,15 @@ export default function NoteEditor({
     };
   }, [noteEditor.commands]);
 
+  /**
+   * The useEffect code below focuses the note editor
+   * input title only after the first render of this
+   * component.
+   */
   useEffect(() => {
-    const inputTitleElem = inputTitleElemRef.current;
-
-    if (!inputTitleElem || disabledInputTitle) return;
-
-    inputTitleElem.focus();
-
-    const range = document.createRange();
-
-    range.selectNodeContents(inputTitleElem);
-    range.collapse(false);
-
-    const selection = window.getSelection();
-
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+    if (!disabledInputTitle) {
+      inputTitleElemRef.current?.focus();
+    }
   }, [disabledInputTitle]);
 
   return (

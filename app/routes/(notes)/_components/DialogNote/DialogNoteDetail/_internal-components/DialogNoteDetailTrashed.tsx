@@ -95,20 +95,12 @@ export default function DialogNoteDetailTrashed({
   return (
     <>
       <DialogNoteContainer
+        isTrashed
         type="detail-note"
         fullScreen={fullScreen}
         dialogOverlayRef={dialogOverlayRef}
         focusTrapProps={{
           active: !isOpenDialogDeleteNote,
-          focusTrapOpts: {
-            initialFocus: () => {
-              const dialogOverlay = dialogOverlayRef.current;
-
-              if (dialogOverlay) {
-                dialogOverlay.focus();
-              }
-            },
-          },
         }}
         onClose={handleCloseDialog}
         bodySection={
