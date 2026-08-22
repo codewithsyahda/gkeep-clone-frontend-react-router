@@ -1,7 +1,6 @@
-import { AxiosError } from 'axios';
 import { useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { useLocation, useNavigate, useSearchParams } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -15,9 +14,14 @@ import OverlayScreen from '~/components/OverlayScreen';
 import Spinner from '~/components/Spinner';
 import DialogNoteDetailEditorInitializer from './_internal-components/DialogNoteDetailEditorInitializer';
 
+import ResponseError from '~/exceptions/responseError';
 import useGetNoteById from '~/hooks/react-query/notes/useGetNoteById';
 
-export default function DialogNoteDetail() {
+export default function DialogNoteDetail({
+  onClose,
+}: Readonly<{
+  onClose: () => void;
+}>) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,37 +36,27 @@ export default function DialogNoteDetail() {
     },
   });
 
-  const [searchParams] = useSearchParams();
-
-  const searchNotesQuery = searchParams.get('search-notes') || '';
-
-  const handleCloseDialog = () =>
-    navigate({
-      hash: '',
-      search: searchNotesQuery
-        ? `?search-notes=${encodeURIComponent(searchNotesQuery)}`
-        : '',
-    });
-
-  const errorResponse = error as AxiosError | null;
-
-  useHotkeys('escape', handleCloseDialog, {
+  useHotkeys('escape', onClose, {
     enableOnFormTags: ['textbox'],
     enableOnContentEditable: true,
   });
 
   /**
    * The useEffect code below redirects to the note page
-   * (active, archived, or trashed page) when the URL
-   * path is /notes/ without a note ID.
+   * (active, archived, or trashed page) when the URL hash
+   * path is #notes/ without a note ID.
    */
   useEffect(() => {
-    if (!noteId) navigate({ hash: '' });
-  }, [navigate, noteId]);
+    if (!noteId)
+      navigate({
+        hash: '',
+        search: location.search,
+      });
+  }, [location.search, navigate, noteId]);
 
   if (!noteId) return null;
 
-  if (!isFetchedAfterMount || errorResponse || !data) {
+  if (!isFetchedAfterMount || error || !data) {
     return (
       <FocusTrap
         focusTrapOptions={{
@@ -76,7 +70,7 @@ export default function DialogNoteDetail() {
             position: 'fixed',
             top: 0,
             left: 0,
-            height: '100dvh',
+            height: '100svh',
             width: '100%',
             zIndex: theme.zIndex.drawer + 1,
           })}
@@ -93,10 +87,10 @@ export default function DialogNoteDetail() {
                 },
               }}
             >
-              <Spinner size={36} />
+              <Spinner size={36} label="Fetching note detail" />
             </Box>
           )}
-          {errorResponse && (
+          {error && (
             <Paper
               elevation={2}
               sx={{
@@ -117,11 +111,17 @@ export default function DialogNoteDetail() {
                     textAlign: 'center',
                   }}
                 >
-                  {errorResponse.status === 404 && 'Note is not found'}
-                  {errorResponse.status === 500 && 'Something went wrong'}
+                  {error instanceof ResponseError ? (
+                    <>
+                      {error.status === 404 && 'Note is not found'}
+                      {error.status === 500 && error.message}
+                    </>
+                  ) : (
+                    error.message
+                  )}
                 </Typography>
                 <Button
-                  onClick={handleCloseDialog}
+                  onClick={onClose}
                   sx={{
                     alignSelf: 'center',
                     maxWidth: 'max-content',
@@ -133,7 +133,7 @@ export default function DialogNoteDetail() {
             </Paper>
           )}
           <OverlayScreen
-            onClick={handleCloseDialog}
+            onClick={onClose}
             sx={{
               position: 'absolute',
               top: 0,
@@ -165,6 +165,7 @@ export default function DialogNoteDetail() {
       noteStatus={archivedAt ? 'archived' : 'active'}
       isTrashed={!!trashedAt}
       updatedAt={updatedAt}
+      onClose={onClose}
     />
   );
 }

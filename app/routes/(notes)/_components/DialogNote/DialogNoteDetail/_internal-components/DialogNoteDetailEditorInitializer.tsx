@@ -13,6 +13,7 @@ export default function DialogNoteDetailEditorInitializer({
   noteStatus,
   isTrashed,
   updatedAt,
+  onClose,
 }: Readonly<{
   noteId: string;
   noteTitle: string;
@@ -20,6 +21,7 @@ export default function DialogNoteDetailEditorInitializer({
   noteStatus: TNoteStatus;
   isTrashed: boolean;
   updatedAt: string;
+  onClose: () => void;
 }>) {
   const noteEditor = useEditor({
     extensions: tiptapConfig.extensions,
@@ -44,6 +46,7 @@ export default function DialogNoteDetailEditorInitializer({
       noteStatus={noteStatus}
       isTrashed={isTrashed}
       updatedAt={updatedAt}
+      onClose={onClose}
     />
   );
 }

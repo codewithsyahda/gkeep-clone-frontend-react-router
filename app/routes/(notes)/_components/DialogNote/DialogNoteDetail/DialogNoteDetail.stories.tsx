@@ -3,7 +3,7 @@ import {
   reactRouterParameters,
   withRouter,
 } from 'storybook-addon-remix-react-router';
-import { expect, screen, waitFor } from 'storybook/test';
+import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
@@ -18,7 +18,6 @@ import {
   patchNoteByIdLoadingHandler,
   putNoteByIdLoadingHandler,
 } from '.storybook/parameters/msw/notesHandlers';
-import * as DialogCreateNoteStories from '../DialogCreateNote.stories';
 import DialogNoteDetailComponent from './DialogNoteDetail';
 
 const meta = {
@@ -26,6 +25,9 @@ const meta = {
   component: DialogNoteDetailComponent,
   parameters: {
     layout: 'centered',
+  },
+  args: {
+    onClose: fn(),
   },
   decorators: [
     reactQueryDecorator,
@@ -65,7 +67,15 @@ export const ActiveNote: Story = {
       handlers: [getActiveNoteByIdHandler, patchNoteByIdHandler],
     },
   },
-  play: DialogCreateNoteStories.Default.play,
+  play: async ({ canvas }) => {
+    await waitFor(() => {
+      expect(
+        canvas.getByRole('textbox', {
+          name: /^Title note$/,
+        }),
+      ).toHaveFocus();
+    });
+  },
 };
 
 export const ActiveNoteFocusTrap: Story = {
@@ -425,7 +435,7 @@ export const ArchivedNote: Story = {
       handlers: [getArchivedNoteByIdHandler, patchNoteByIdHandler],
     },
   },
-  play: DialogCreateNoteStories.Default.play,
+  play: ActiveNote.play,
 };
 
 export const ArchivedNoteFocusTrap: Story = {
@@ -888,7 +898,9 @@ export const ServerError: Story = {
   },
   play: async ({ canvas }) => {
     await waitFor(async () => {
-      await expect(canvas.getByText('Something went wrong')).toBeVisible();
+      await expect(
+        canvas.getByText(/^Cannot process the request\.$/),
+      ).toBeVisible();
 
       await expect(
         canvas.getByRole('button', {

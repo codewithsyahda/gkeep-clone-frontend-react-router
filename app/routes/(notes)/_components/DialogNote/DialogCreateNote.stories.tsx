@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Toaster } from 'sonner';
 import { withRouter } from 'storybook-addon-remix-react-router';
-import { expect, waitFor } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
@@ -15,6 +15,9 @@ const meta = {
   component: DialogCreateNoteComponent,
   parameters: {
     layout: 'centered',
+  },
+  args: {
+    onClose: fn(),
   },
   decorators: [
     reactQueryDecorator,
@@ -179,7 +182,7 @@ export const CreateNoteSuccess: Story = {
       handlers: [postNoteHandler],
     },
   },
-  play: async ({ canvas, userEvent }) => {
+  play: async ({ args, canvas, userEvent }) => {
     await userEvent.type(
       canvas.getByRole('textbox', { name: 'Title note' }),
       'Title by Storybook',
@@ -205,5 +208,7 @@ export const CreateNoteSuccess: Story = {
     await waitFor(async () => {
       await expect(canvas.getByText('Note created')).toBeVisible();
     });
+
+    await expect(args.onClose).toHaveBeenCalledOnce();
   },
 };

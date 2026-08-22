@@ -1,5 +1,5 @@
 import { PlusIcon } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -36,9 +36,16 @@ export default function ActiveNotesPageContent() {
 
   const notesSelectionCtx = useNotesSelectionCtx();
 
+  const navigate = useNavigate();
+
+  const handleCloseDialog = () =>
+    navigate({ hash: '', search: location.search });
+
   return (
     <>
-      {isOpenDialogCreateNote && <DialogCreateNote />}
+      {isOpenDialogCreateNote && (
+        <DialogCreateNote onClose={handleCloseDialog} />
+      )}
       {!isFetchedAfterMount && (
         <SidebarContentAlertContainer>
           <Spinner size={36} />
@@ -99,6 +106,7 @@ export default function ActiveNotesPageContent() {
           variant="contained"
           to={{
             hash: '#create',
+            search: location.search,
           }}
           startIcon={
             <Box

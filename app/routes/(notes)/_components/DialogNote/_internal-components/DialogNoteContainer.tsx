@@ -1,4 +1,5 @@
 import {
+  useEffect,
   type CSSProperties,
   type MouseEventHandler,
   type ReactNode,
@@ -16,6 +17,7 @@ import OverlayScreen from '~/components/OverlayScreen';
 export default function DialogNoteContainer({
   type,
   fullScreen,
+  isTrashed,
   focusTrapProps,
   bodySection,
   actionSection,
@@ -27,9 +29,13 @@ export default function DialogNoteContainer({
 }: Readonly<{
   type: 'create-note' | 'detail-note';
   fullScreen: boolean;
+  isTrashed?: boolean;
   focusTrapProps?: {
     active?: boolean;
-    focusTrapOpts?: FocusTrapProps['focusTrapOptions'];
+    focusTrapOpts?: Omit<
+      Exclude<FocusTrapProps['focusTrapOptions'], undefined>,
+      'escapeDeactivates' | 'initialFocus' | 'fallbackFocus'
+    >;
   };
   bodySection: ReactNode;
   actionSection: ReactNode;
@@ -39,11 +45,18 @@ export default function DialogNoteContainer({
   dialogActionsRef?: RefObject<HTMLDivElement | null>;
   dialogOverlayRef?: RefObject<HTMLButtonElement | null>;
 }>) {
+  useEffect(() => {
+    if (isTrashed) {
+      dialogOverlayRef?.current?.focus();
+    }
+  }, [dialogOverlayRef, isTrashed]);
+
   return (
     <FocusTrap
       active={focusTrapProps?.active}
       focusTrapOptions={{
         ...focusTrapProps?.focusTrapOpts,
+        initialFocus: false,
         escapeDeactivates: false,
       }}
     >
@@ -58,13 +71,13 @@ export default function DialogNoteContainer({
           position: 'fixed',
           top: 0,
           left: 0,
-          height: '100dvh',
+          height: '100svh',
           width: '100%',
           zIndex: theme.zIndex.drawer + 1,
         })}
       >
         <Paper
-          data-component="container"
+          data-component="note-editor-container"
           ref={dialogPaperRef}
           elevation={2}
           style={
