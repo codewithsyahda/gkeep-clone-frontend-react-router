@@ -43,8 +43,8 @@ export default function DialogNoteDetail({
 
   /**
    * The useEffect code below redirects to the note page
-   * (active, archived, or trashed page) when the URL
-   * path is /notes/ without a note ID.
+   * (active, archived, or trashed page) when the URL hash
+   * path is #notes/ without a note ID.
    */
   useEffect(() => {
     if (!noteId)
