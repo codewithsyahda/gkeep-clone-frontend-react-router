@@ -1,4 +1,3 @@
-import { AxiosError } from 'axios';
 import { useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useLocation, useNavigate } from 'react-router';
@@ -15,6 +14,7 @@ import OverlayScreen from '~/components/OverlayScreen';
 import Spinner from '~/components/Spinner';
 import DialogNoteDetailEditorInitializer from './_internal-components/DialogNoteDetailEditorInitializer';
 
+import ResponseError from '~/exceptions/responseError';
 import useGetNoteById from '~/hooks/react-query/notes/useGetNoteById';
 
 export default function DialogNoteDetail({
@@ -36,8 +36,6 @@ export default function DialogNoteDetail({
     },
   });
 
-  const errorResponse = error as AxiosError | null;
-
   useHotkeys('escape', onClose, {
     enableOnFormTags: ['textbox'],
     enableOnContentEditable: true,
@@ -58,7 +56,7 @@ export default function DialogNoteDetail({
 
   if (!noteId) return null;
 
-  if (!isFetchedAfterMount || errorResponse || !data) {
+  if (!isFetchedAfterMount || error || !data) {
     return (
       <FocusTrap
         focusTrapOptions={{
@@ -72,7 +70,7 @@ export default function DialogNoteDetail({
             position: 'fixed',
             top: 0,
             left: 0,
-            height: '100dvh',
+            height: '100svh',
             width: '100%',
             zIndex: theme.zIndex.drawer + 1,
           })}
@@ -89,10 +87,10 @@ export default function DialogNoteDetail({
                 },
               }}
             >
-              <Spinner size={36} />
+              <Spinner size={36} label="Fetching note detail" />
             </Box>
           )}
-          {errorResponse && (
+          {error && (
             <Paper
               elevation={2}
               sx={{
@@ -113,8 +111,14 @@ export default function DialogNoteDetail({
                     textAlign: 'center',
                   }}
                 >
-                  {errorResponse.status === 404 && 'Note is not found'}
-                  {errorResponse.status === 500 && 'Something went wrong'}
+                  {error instanceof ResponseError ? (
+                    <>
+                      {error.status === 404 && 'Note is not found'}
+                      {error.status === 500 && error.message}
+                    </>
+                  ) : (
+                    error.message
+                  )}
                 </Typography>
                 <Button
                   onClick={onClose}
