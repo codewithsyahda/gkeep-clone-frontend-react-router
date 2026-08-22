@@ -898,7 +898,9 @@ export const ServerError: Story = {
   },
   play: async ({ canvas }) => {
     await waitFor(async () => {
-      await expect(canvas.getByText('Something went wrong')).toBeVisible();
+      await expect(
+        canvas.getByText(/^Cannot process the request\.$/),
+      ).toBeVisible();
 
       await expect(
         canvas.getByRole('button', {
