@@ -8,10 +8,8 @@ import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  deleteNoteByIdHandler,
-  deleteNoteByIdLoadingHandler,
-  deleteNoteByIdServerErrorHandler,
-  patchNoteByIdHandler,
+  mockDeleteNoteByIdHandler,
+  mockPatchNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import * as ActiveNoteCardStories from './ActiveNoteCard.stories';
@@ -23,7 +21,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [patchNoteByIdHandler, deleteNoteByIdHandler],
+      handlers: [mockPatchNoteByIdHandler(), mockDeleteNoteByIdHandler()],
     },
     reactRouter: reactRouterParameters({
       routing: {
@@ -471,7 +469,10 @@ export const Deleting: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [patchNoteByIdHandler, deleteNoteByIdLoadingHandler],
+      handlers: [
+        mockPatchNoteByIdHandler(),
+        mockDeleteNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -509,7 +510,7 @@ export const DeleteSuccess: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [patchNoteByIdHandler, deleteNoteByIdHandler],
+      handlers: [mockPatchNoteByIdHandler(), mockDeleteNoteByIdHandler()],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -557,7 +558,10 @@ export const DeleteError: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [patchNoteByIdHandler, deleteNoteByIdServerErrorHandler],
+      handlers: [
+        mockPatchNoteByIdHandler(),
+        mockDeleteNoteByIdHandler({ errorStatus: '500' }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {

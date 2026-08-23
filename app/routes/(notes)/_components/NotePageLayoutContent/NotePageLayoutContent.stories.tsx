@@ -13,10 +13,10 @@ import {
   signOutLoadingHandler,
 } from '.storybook/parameters/msw/authHandlers';
 import {
-  getEmptyNotesHandler,
-  patchNoteByIdHandler,
-  postNoteHandler,
-  putNoteByIdHandler,
+  mockGetNotesHandler,
+  mockPatchNoteByIdHandler,
+  mockPostNoteHandler,
+  mockPutNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
@@ -55,10 +55,10 @@ export const Default: Story = {
       handlers: [
         mockGetSessionHandler(),
         getNotesHandler,
-        postNoteHandler,
+        mockPostNoteHandler(),
         getNoteByIdHandler,
-        putNoteByIdHandler,
-        patchNoteByIdHandler,
+        mockPutNoteByIdHandler(),
+        mockPatchNoteByIdHandler(),
         signOutHandler,
       ],
     },
@@ -123,8 +123,8 @@ export const ActiveNotesSelectionBar: Story = {
     msw: {
       handlers: [
         mockGetSessionHandler(),
-        getEmptyNotesHandler,
-        patchNoteByIdHandler,
+        mockGetNotesHandler({ emptyNotes: true }),
+        mockPatchNoteByIdHandler(),
         signOutHandler,
       ],
     },
@@ -312,8 +312,8 @@ export const ArchivedNotesSelectionBar: Story = {
     msw: {
       handlers: [
         mockGetSessionHandler(),
-        getEmptyNotesHandler,
-        patchNoteByIdHandler,
+        mockGetNotesHandler({ emptyNotes: true }),
+        mockPatchNoteByIdHandler(),
         signOutHandler,
       ],
     },
@@ -501,8 +501,8 @@ export const NonTrashedNotesSelectionBar: Story = {
     msw: {
       handlers: [
         mockGetSessionHandler(),
-        getEmptyNotesHandler,
-        patchNoteByIdHandler,
+        mockGetNotesHandler({ emptyNotes: true }),
+        mockPatchNoteByIdHandler(),
         signOutHandler,
       ],
     },

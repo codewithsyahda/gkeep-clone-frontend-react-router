@@ -7,16 +7,10 @@ import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  deleteNoteByIdLoadingHandler,
-  getActiveNoteByIdHandler,
-  getArchivedNoteByIdHandler,
-  getNoteByIdClientErrorHandler,
-  getNoteByIdLoadingHandler,
-  getNoteByIdServerErrorHandler,
-  getTrashedNoteByIdHandler,
-  patchNoteByIdHandler,
-  patchNoteByIdLoadingHandler,
-  putNoteByIdLoadingHandler,
+  mockDeleteNoteByIdHandler,
+  mockGetNoteByIdHandler,
+  mockPatchNoteByIdHandler,
+  mockPutNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import DialogNoteDetailComponent from './DialogNoteDetail';
 
@@ -55,7 +49,7 @@ export const Loading: Story = {
       },
     }),
     msw: {
-      handlers: [getNoteByIdLoadingHandler],
+      handlers: [mockGetNoteByIdHandler({ delayInfinite: true })],
     },
   },
 };
@@ -64,7 +58,7 @@ export const ActiveNote: Story = {
   parameters: {
     reactRouter: Loading?.parameters?.reactRouter,
     msw: {
-      handlers: [getActiveNoteByIdHandler, patchNoteByIdHandler],
+      handlers: [mockGetNoteByIdHandler(), mockPatchNoteByIdHandler()],
     },
   },
   play: async ({ canvas }) => {
@@ -241,7 +235,10 @@ export const ArchivingActiveNote: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [getActiveNoteByIdHandler, putNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler(),
+        mockPutNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -322,7 +319,10 @@ export const UpdatingActiveNote: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [getActiveNoteByIdHandler, patchNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler(),
+        mockPatchNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -432,7 +432,10 @@ export const ArchivedNote: Story = {
       },
     }),
     msw: {
-      handlers: [getArchivedNoteByIdHandler, patchNoteByIdHandler],
+      handlers: [
+        mockGetNoteByIdHandler({ status: 'archived' }),
+        mockPatchNoteByIdHandler(),
+      ],
     },
   },
   play: ActiveNote.play,
@@ -509,7 +512,10 @@ export const UnarchiveArchivedNote: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [getArchivedNoteByIdHandler, putNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler({ status: 'archived' }),
+        mockPutNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -590,7 +596,10 @@ export const UpdatingArchivedNote: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [getArchivedNoteByIdHandler, patchNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler({ status: 'archived' }),
+        mockPatchNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -645,7 +654,7 @@ export const TrashedNote: Story = {
       },
     }),
     msw: {
-      handlers: [getTrashedNoteByIdHandler],
+      handlers: [mockGetNoteByIdHandler({ status: 'trashed' })],
     },
   },
   play: async ({ canvas }) => {
@@ -798,7 +807,10 @@ export const RestoringTrashedNote: Story = {
   parameters: {
     ...TrashedNote.parameters,
     msw: {
-      handlers: [getTrashedNoteByIdHandler, patchNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler({ status: 'trashed' }),
+        mockPatchNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -840,7 +852,10 @@ export const DeletingTrashedNote: Story = {
   parameters: {
     ...RestoringTrashedNote.parameters,
     msw: {
-      handlers: [getTrashedNoteByIdHandler, deleteNoteByIdLoadingHandler],
+      handlers: [
+        mockGetNoteByIdHandler({ status: 'trashed' }),
+        mockDeleteNoteByIdHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -873,7 +888,7 @@ export const NotFoundError: Story = {
   parameters: {
     ...ActiveNote.parameters,
     msw: {
-      handlers: [getNoteByIdClientErrorHandler],
+      handlers: [mockGetNoteByIdHandler({ errorStatus: '404' })],
     },
   },
   play: async ({ canvas }) => {
@@ -893,7 +908,7 @@ export const ServerError: Story = {
   parameters: {
     ...ArchivedNote.parameters,
     msw: {
-      handlers: [getNoteByIdServerErrorHandler],
+      handlers: [mockGetNoteByIdHandler({ errorStatus: '500' })],
     },
   },
   play: async ({ canvas }) => {

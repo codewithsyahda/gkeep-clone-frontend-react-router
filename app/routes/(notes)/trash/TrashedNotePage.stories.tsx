@@ -6,11 +6,11 @@ import { expect, screen, waitFor } from 'storybook/test';
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import { mockGetSessionHandler } from '.storybook/parameters/msw/authHandlers';
 import {
-  deleteNoteByIdHandler,
-  deleteNotesHandler,
-  getEmptyNotesHandler,
-  patchNoteByIdHandler,
-  putNoteByIdHandler,
+  mockDeleteNoteByIdHandler,
+  mockDeleteNotesHandler,
+  mockGetNotesHandler,
+  mockPatchNoteByIdHandler,
+  mockPutNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
@@ -73,10 +73,10 @@ export const Default: Story = {
         mockGetSessionHandler(),
         getNotesHandler,
         getNoteByIdHandler,
-        putNoteByIdHandler,
-        patchNoteByIdHandler,
-        deleteNoteByIdHandler,
-        deleteNotesHandler,
+        mockPutNoteByIdHandler(),
+        mockPatchNoteByIdHandler(),
+        mockDeleteNoteByIdHandler(),
+        mockDeleteNotesHandler(),
         signOutHandler,
       ],
     },
@@ -86,7 +86,11 @@ export const Default: Story = {
 export const EmptyNotes: Story = {
   parameters: {
     msw: {
-      handlers: [mockGetSessionHandler(), getEmptyNotesHandler, signOutHandler],
+      handlers: [
+        mockGetSessionHandler(),
+        mockGetNotesHandler({ emptyNotes: true }),
+        signOutHandler,
+      ],
     },
   },
 };
