@@ -8,11 +8,8 @@ import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  getInvalidSessionHandler,
-  signUpClientErrorHandler,
-  signUpHandler,
-  signUpLoadingHandler,
-  signUpServerErrorHandler,
+  mockGetSessionHandler,
+  mockSignUpHandler,
 } from '.storybook/parameters/msw/authHandlers';
 import SignupPageContentComponent from './SignupPageContent';
 
@@ -22,7 +19,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [getInvalidSessionHandler],
+      handlers: [mockGetSessionHandler({ errorStatus: '401' })],
     },
     reactRouter: reactRouterParameters({
       location: {
@@ -170,7 +167,10 @@ export const SigningUp: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signUpLoadingHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignUpHandler({ delayInfinite: true }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -207,7 +207,10 @@ export const SignupSuccess: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signUpHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignUpHandler(),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -260,7 +263,10 @@ export const SignupClientError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signUpClientErrorHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignUpHandler({ errorStatus: '422' }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -317,7 +323,10 @@ export const SignupServerError: Story = {
   parameters: {
     ...meta.parameters,
     msw: {
-      handlers: [getInvalidSessionHandler, signUpServerErrorHandler],
+      handlers: [
+        mockGetSessionHandler({ errorStatus: '401' }),
+        mockSignUpHandler({ errorStatus: '500' }),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {

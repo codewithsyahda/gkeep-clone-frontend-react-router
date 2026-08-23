@@ -7,13 +7,10 @@ import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  deleteNoteByIdHandler,
-  deleteNotesHandler,
-  deleteNotesLoadingHandler,
-  getEmptyNotesHandler,
-  getNotesHandler,
-  getNotesLoadingHandler,
-  patchNoteByIdHandler,
+  mockDeleteNoteByIdHandler,
+  mockDeleteNotesHandler,
+  mockGetNotesHandler,
+  mockPatchNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import TrashedNotesPageContent from './TrashedNotesPageContent';
@@ -52,7 +49,7 @@ type Story = StoryObj<typeof meta>;
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [getNotesLoadingHandler],
+      handlers: [mockGetNotesHandler({ delayInfinite: true })],
     },
   },
   play: async ({ canvas }) => {
@@ -77,7 +74,7 @@ export const Loading: Story = {
 export const Empty: Story = {
   parameters: {
     msw: {
-      handlers: [getEmptyNotesHandler],
+      handlers: [mockGetNotesHandler({ emptyNotes: true })],
     },
   },
   play: async ({ canvas }) => {
@@ -103,10 +100,10 @@ export const AvailableNotes: Story = {
   parameters: {
     msw: {
       handlers: [
-        getNotesHandler,
-        patchNoteByIdHandler,
-        deleteNotesHandler,
-        deleteNoteByIdHandler,
+        mockGetNotesHandler(),
+        mockPatchNoteByIdHandler(),
+        mockDeleteNotesHandler(),
+        mockDeleteNoteByIdHandler(),
       ],
     },
   },
@@ -228,10 +225,10 @@ export const DeletingAllNotes: Story = {
   parameters: {
     msw: {
       handlers: [
-        getNotesHandler,
-        patchNoteByIdHandler,
-        deleteNoteByIdHandler,
-        deleteNotesLoadingHandler,
+        mockGetNotesHandler(),
+        mockPatchNoteByIdHandler(),
+        mockDeleteNoteByIdHandler(),
+        mockDeleteNotesHandler({ delayInfinite: true }),
       ],
     },
   },

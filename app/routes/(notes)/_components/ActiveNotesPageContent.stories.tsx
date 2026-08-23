@@ -7,11 +7,9 @@ import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
 import {
-  getEmptyNotesHandler,
-  getNotesHandler,
-  getNotesLoadingHandler,
-  patchNoteByIdHandler,
-  putNoteByIdHandler,
+  mockGetNotesHandler,
+  mockPatchNoteByIdHandler,
+  mockPutNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import ActiveNotesPageContent from './ActiveNotesPageContent';
@@ -47,7 +45,7 @@ type Story = StoryObj<typeof meta>;
 export const Loading: Story = {
   parameters: {
     msw: {
-      handlers: [getNotesLoadingHandler],
+      handlers: [mockGetNotesHandler({ delayInfinite: true })],
     },
   },
   play: async ({ canvas }) => {
@@ -62,7 +60,7 @@ export const Loading: Story = {
 export const Empty: Story = {
   parameters: {
     msw: {
-      handlers: [getEmptyNotesHandler],
+      handlers: [mockGetNotesHandler({ emptyNotes: true })],
     },
   },
   play: async ({ canvas }) => {
@@ -77,7 +75,11 @@ export const Empty: Story = {
 export const AvailableNotes: Story = {
   parameters: {
     msw: {
-      handlers: [getNotesHandler, putNoteByIdHandler, patchNoteByIdHandler],
+      handlers: [
+        mockGetNotesHandler(),
+        mockPutNoteByIdHandler(),
+        mockPatchNoteByIdHandler(),
+      ],
     },
   },
   play: async ({ canvas, userEvent }) => {

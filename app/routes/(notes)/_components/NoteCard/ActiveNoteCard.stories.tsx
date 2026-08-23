@@ -7,11 +7,7 @@ import {
 import { expect, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import {
-  patchNoteByIdHandler,
-  patchNoteByIdLoadingHandler,
-  patchNoteByIdServerErrorHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+import { mockPatchNoteByIdHandler } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import ActiveNoteCardComponent from './ActiveNoteCard';
 
@@ -21,7 +17,7 @@ const meta = {
   parameters: {
     layout: 'centered',
     msw: {
-      handlers: [patchNoteByIdHandler],
+      handlers: [mockPatchNoteByIdHandler()],
     },
     reactRouter: reactRouterParameters({
       routing: {
@@ -429,7 +425,7 @@ export const Archiving: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [patchNoteByIdLoadingHandler],
+      handlers: [mockPatchNoteByIdHandler({ delayInfinite: true })],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -472,7 +468,7 @@ export const ArchiveError: Story = {
   args,
   parameters: {
     msw: {
-      handlers: [patchNoteByIdServerErrorHandler],
+      handlers: [mockPatchNoteByIdHandler({ errorStatus: '500' })],
     },
   },
   play: async ({ canvas, userEvent }) => {

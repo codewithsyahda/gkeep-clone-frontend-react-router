@@ -4,12 +4,12 @@ import { Toaster } from 'sonner';
 import { expect, screen, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import { getSessionHandler } from '.storybook/parameters/msw/authHandlers';
+import { mockGetSessionHandler } from '.storybook/parameters/msw/authHandlers';
 import {
-  getEmptyNotesHandler,
-  patchNoteByIdHandler,
-  postNoteHandler,
-  putNoteByIdHandler,
+  mockGetNotesHandler,
+  mockPatchNoteByIdHandler,
+  mockPostNoteHandler,
+  mockPutNoteByIdHandler,
 } from '.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
@@ -66,12 +66,12 @@ export const Default: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
+        mockGetSessionHandler(),
         getNotesHandler,
-        postNoteHandler,
+        mockPostNoteHandler(),
         getNoteByIdHandler,
-        putNoteByIdHandler,
-        patchNoteByIdHandler,
+        mockPutNoteByIdHandler(),
+        mockPatchNoteByIdHandler(),
         signOutHandler,
       ],
     },
@@ -117,9 +117,9 @@ export const EmptyNotes: Story = {
   parameters: {
     msw: {
       handlers: [
-        getSessionHandler,
-        getEmptyNotesHandler,
-        postNoteHandler,
+        mockGetSessionHandler(),
+        mockGetNotesHandler({ emptyNotes: true }),
+        mockPostNoteHandler(),
         signOutHandler,
       ],
     },

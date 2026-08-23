@@ -4,10 +4,7 @@ import { withRouter } from 'storybook-addon-remix-react-router';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import {
-  postNoteHandler,
-  postNoteLoadingHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+import { mockPostNoteHandler } from '.storybook/parameters/msw/notesHandlers';
 import DialogCreateNoteComponent from './DialogCreateNote';
 
 const meta = {
@@ -148,7 +145,7 @@ export const FocusTrap: Story = {
 export const Creating: Story = {
   parameters: {
     msw: {
-      handlers: [postNoteLoadingHandler],
+      handlers: [mockPostNoteHandler({ delayInfinite: true })],
     },
   },
   play: async ({ canvas, userEvent }) => {
@@ -179,7 +176,7 @@ export const Creating: Story = {
 export const CreateNoteSuccess: Story = {
   parameters: {
     msw: {
-      handlers: [postNoteHandler],
+      handlers: [mockPostNoteHandler()],
     },
   },
   play: async ({ args, canvas, userEvent }) => {
