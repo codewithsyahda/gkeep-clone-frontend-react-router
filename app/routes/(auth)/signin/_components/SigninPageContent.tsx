@@ -1,8 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
 import { z } from 'zod';
 
 import Box from '@mui/material/Box';
@@ -23,12 +21,6 @@ import AuthPageContainer from '../../_components/AuthPageContainer';
 import { SigninFormScheme } from '~/lib/definitions';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 
-const useSession = (
-  await (import.meta.env.DEV
-    ? import('~/hooks/react-query/auth/__mocks__/useSession')
-    : import('~/hooks/react-query/auth/useSession'))
-).default;
-
 const useSigninWithEmail = (
   await (import.meta.env.DEV
     ? import('~/hooks/react-query/auth/__mocks__/useSigninWithEmail')
@@ -45,45 +37,23 @@ export default function SigninPageContent() {
   });
 
   const queryClient = useQueryClient();
+
   const mutSigninWithEmail = useSigninWithEmail();
 
   const handleSignin = async (data: z.infer<typeof SigninFormScheme>) => {
     try {
       await mutSigninWithEmail.mutateAsync(data);
 
-      queryClient.removeQueries({
+      await queryClient.invalidateQueries({
         queryKey: ['session'],
       });
     } catch (err) {
-      const errMessage = (err as Error).message;
-
       emitSnackbarAlert({
-        alertText: errMessage,
+        alertText: (err as Error).message,
         alertSeverity: 'error',
       });
     }
   };
-
-  const navigate = useNavigate();
-  const session = useSession();
-
-  const sessionData = session.data;
-
-  useEffect(() => {
-    if (!session.isPending && sessionData) {
-      const firstName = sessionData.session.name.split(' ')[0];
-
-      emitSnackbarAlert({
-        alertText: `Welcome back, ${firstName}!`,
-      });
-
-      navigate('/', { replace: true });
-    }
-  }, [navigate, session.isPending, sessionData]);
-
-  if (!mutSigninWithEmail.isSuccess && (session.isPending || sessionData)) {
-    return null;
-  }
 
   return (
     <AuthPageContainer>
