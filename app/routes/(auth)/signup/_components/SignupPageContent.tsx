@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
@@ -21,12 +20,6 @@ import AuthPageContainer from '../../_components/AuthPageContainer';
 
 import { SignupFormScheme } from '~/lib/definitions';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
-
-const useSession = (
-  await (import.meta.env.DEV
-    ? import('~/hooks/react-query/auth/__mocks__/useSession')
-    : import('~/hooks/react-query/auth/useSession'))
-).default;
 
 const useSignupWithEmail = (
   await (import.meta.env.DEV
@@ -62,38 +55,12 @@ export default function SignupPageContent() {
         alertText: 'Signing up is successful',
       });
     } catch (error) {
-      const errorMessage = (error as Error).message;
-
       emitSnackbarAlert({
-        alertText: errorMessage,
+        alertText: (error as Error).message,
         alertSeverity: 'error',
       });
     }
   };
-
-  const session = useSession();
-
-  const sessionData = session.data?.session;
-
-  useEffect(() => {
-    if (!session.isPending && sessionData) {
-      const redirect = async () => {
-        const firstName = sessionData.name.split(' ')[0];
-
-        await navigate('/', { replace: true });
-
-        emitSnackbarAlert({
-          alertText: `Welcome back, ${firstName}!`,
-        });
-      };
-
-      void redirect();
-    }
-  }, [navigate, session.isPending, sessionData]);
-
-  if (!mutSignupWithEmail.isSuccess && (session.isPending || sessionData)) {
-    return null;
-  }
 
   return (
     <AuthPageContainer>
