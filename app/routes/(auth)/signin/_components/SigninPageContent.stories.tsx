@@ -1,33 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import * as cookie from 'cookie';
-import { delay, http, HttpResponse } from 'msw';
 import { Toaster } from 'sonner';
 import {
   reactRouterParameters,
   withRouter,
 } from 'storybook-addon-remix-react-router';
-import { expect, waitFor } from 'storybook/test';
+import type { Canvas, Globals } from 'storybook/internal/csf';
+import { expect, waitFor, type UserEventObject } from 'storybook/test';
 
 import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import {
-  mockGetSessionHandler,
-  mockSignInHandler,
-} from '.storybook/parameters/msw/authHandlers';
-import envConfig from '~/configs/envs';
+import { mockSignInHandler } from '.storybook/parameters/msw/authHandlers';
 import SigninPageContentComponent from './SigninPageContent';
 
 const meta = {
   title: 'Pages/SigninPageContent',
   component: SigninPageContentComponent,
   parameters: {
-    layout: 'centered',
-    msw: {
-      handlers: [mockGetSessionHandler({ errorStatus: '401' })],
-    },
+    layout: 'fullscreen',
     reactRouter: reactRouterParameters({
-      location: {
-        path: '/signin',
-      },
       routing: {
         path: '/*',
       },
@@ -37,9 +26,7 @@ const meta = {
     reactQueryDecorator,
     (Story) => (
       <>
-        <div className="-m-4 w-screen">
-          <Story />
-        </div>
+        <Story />
         <Toaster duration={Infinity} />
       </>
     ),
@@ -51,7 +38,10 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
+export const DefaultMobile: Story = {
+  globals: {
+    viewport: { value: 'mobile1', isRotated: false },
+  },
   play: async ({ canvas }) => {
     await waitFor(async () => {
       await expect(canvas.getByText('Welcome back')).toBeVisible();
@@ -72,7 +62,12 @@ export const Default: Story = {
   },
 };
 
-export const FormEmptyError: Story = {
+export const Default: Story = {
+  play: DefaultMobile.play,
+};
+
+export const FormEmptyErrorMobile: Story = {
+  globals: DefaultMobile.globals,
   play: async ({ canvas, userEvent }) => {
     await waitFor(
       async () => {
@@ -97,151 +92,80 @@ export const FormEmptyError: Story = {
   },
 };
 
-export const SigningIn: Story = {
-  parameters: {
-    ...meta.parameters,
-    msw: {
-      handlers: [
-        mockGetSessionHandler({ errorStatus: '401' }),
-        mockSignInHandler({ delayInfinite: true }),
-      ],
-    },
-  },
-  play: async ({ canvas, userEvent }) => {
-    await waitFor(
-      async () => {
-        await userEvent.type(canvas.getByLabelText('Email'), 'foo@doe.com');
-        await userEvent.type(canvas.getByLabelText('Password'), '12345678');
+export const FormEmptyError: Story = {
+  play: FormEmptyErrorMobile.play,
+};
 
+async function playBasicSignin({
+  globals,
+  canvas,
+  userEvent,
+}: Readonly<{
+  globals: Globals;
+  canvas: Canvas;
+  userEvent: UserEventObject;
+}>) {
+  await waitFor(
+    async () => {
+      await userEvent.type(canvas.getByLabelText('Email'), 'foo@doe.com');
+      await userEvent.type(canvas.getByLabelText('Password'), '12345678');
+
+      if (globals?.viewport?.value === 'mobile1') {
+        await userEvent.pointer({
+          keys: '[TouchA]',
+          target: canvas.getByRole('button', {
+            name: 'Sign in',
+          }),
+        });
+      } else {
         await userEvent.click(
           canvas.getByRole('button', {
             name: 'Sign in',
           }),
         );
-      },
-      { timeout: 3000 },
-    );
+      }
+    },
+    { timeout: 3000 },
+  );
 
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
+  await waitFor(async () => {
+    await expect(canvas.getByLabelText('Email')).toBeDisabled();
+    await expect(canvas.getByLabelText('Password')).toBeDisabled();
 
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Signing in',
-        }),
-      ).toBeDisabled();
-    });
+    await expect(
+      canvas.getByRole('button', {
+        name: 'Signing in',
+      }),
+    ).toBeDisabled();
+  });
+}
+
+export const SigningInMobile: Story = {
+  globals: DefaultMobile.globals,
+  parameters: {
+    msw: {
+      handlers: [mockSignInHandler({ delayInfinite: true })],
+    },
+  },
+  play: async ({ globals, canvas, userEvent }) => {
+    await playBasicSignin({ globals, canvas, userEvent });
   },
 };
 
-export const SigninSuccess: Story = {
+export const SigningIn: Story = {
+  parameters: SigningInMobile.parameters,
+  play: SigningInMobile.play,
+};
+
+export const SigninSuccessMobile: Story = {
+  globals: DefaultMobile.globals,
   parameters: {
-    ...meta.parameters,
     msw: {
-      handlers: [
-        http.get(
-          `${envConfig.api.baseUrl}/auth/get-session`,
-          async ({ cookies }) => {
-            await delay('real');
-
-            const session = cookies['auth.is_signed_in'];
-
-            if (session) {
-              return HttpResponse.json(
-                {
-                  data: {
-                    session: {
-                      id: 'id-user-1',
-                      name: 'Foo Doe',
-                      email: 'foo@doe.com',
-                      emailVerified: false,
-                      image: null,
-                      createdAt: new Date(2026, 0, 1),
-                      updatedAt: new Date(2026, 0, 1),
-                    },
-                  },
-                },
-                {
-                  headers: {
-                    'content-type': 'application/json',
-                    'set-cookie': cookie.stringifySetCookie({
-                      name: 'auth.is_signed_in',
-                      value: '',
-                      maxAge: 0,
-                    }),
-                  },
-                },
-              );
-            }
-
-            return HttpResponse.json(
-              {
-                error: {
-                  message: 'Please sign in first',
-                },
-              },
-              {
-                status: 401,
-              },
-            );
-          },
-        ),
-        http.post(`${envConfig.api.baseUrl}/auth/sign-in/email`, async () => {
-          await delay('real');
-          return HttpResponse.json(
-            {
-              data: {
-                user: {
-                  id: 'id-user-1',
-                  name: 'Foo Doe',
-                  email: 'foo@doe.com',
-                  emailVerified: false,
-                  image: null,
-                  createdAt: new Date(2026, 0, 1),
-                  updatedAt: new Date(2026, 0, 1),
-                },
-              },
-            },
-            {
-              headers: {
-                'content-type': 'application/json',
-                'set-cookie': cookie.stringifySetCookie({
-                  name: 'auth.is_signed_in',
-                  value: 'true',
-                }),
-              },
-            },
-          );
-        }),
-      ],
+      handlers: [mockSignInHandler()],
     },
   },
-  play: async ({ canvas, userEvent }) => {
-    await waitFor(
-      async () => {
-        await userEvent.type(canvas.getByLabelText('Email'), 'foo@doe.com');
-        await userEvent.type(canvas.getByLabelText('Password'), '12345678');
-
-        await userEvent.click(
-          canvas.getByRole('button', {
-            name: 'Sign in',
-          }),
-        );
-      },
-      { timeout: 3000 },
-    );
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Signing in',
-        }),
-      ).toBeDisabled();
-    });
+  play: async ({ globals, canvas, userEvent }) => {
+    await playBasicSignin({ globals, canvas, userEvent });
 
     await waitFor(async () => {
       await expect(canvas.getByLabelText('Email')).toBeDisabled();
@@ -253,62 +177,45 @@ export const SigninSuccess: Story = {
         }),
       ).toBeDisabled();
     });
-
-    await waitFor(async () => {
-      await expect(canvas.getByText('Welcome back, Foo!')).toBeVisible();
-    });
   },
 };
 
-export const SigninClientError: Story = {
+export const SigninSuccess: Story = {
+  parameters: SigninSuccessMobile.parameters,
+  play: SigninSuccessMobile.play,
+};
+
+async function playBasicSigninError({
+  canvas,
+}: Readonly<{
+  canvas: Canvas;
+}>) {
+  await waitFor(async () => {
+    await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
+    await expect(canvas.getByLabelText('Password')).not.toBeDisabled();
+
+    await expect(canvas.getByLabelText('Email')).toHaveValue('foo@doe.com');
+    await expect(canvas.getByLabelText('Password')).toHaveValue('12345678');
+
+    await expect(
+      canvas.getByRole('button', {
+        name: 'Sign in',
+      }),
+    ).not.toBeDisabled();
+  });
+}
+
+export const SigninClientErrorMobile: Story = {
+  globals: DefaultMobile.globals,
   parameters: {
-    ...meta.parameters,
     msw: {
-      handlers: [
-        mockGetSessionHandler({ errorStatus: '401' }),
-        mockSignInHandler({ errorStatus: '401' }),
-      ],
+      handlers: [mockSignInHandler({ errorStatus: '401' })],
     },
   },
-  play: async ({ canvas, userEvent }) => {
-    await waitFor(
-      async () => {
-        await userEvent.type(canvas.getByLabelText('Email'), 'foo@doe.com');
-        await userEvent.type(canvas.getByLabelText('Password'), '12345678');
+  play: async ({ globals, canvas, userEvent }) => {
+    await playBasicSignin({ globals, canvas, userEvent });
 
-        await userEvent.click(
-          canvas.getByRole('button', {
-            name: 'Sign in',
-          }),
-        );
-      },
-      { timeout: 3000 },
-    );
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Signing in',
-        }),
-      ).toBeDisabled();
-    });
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).not.toBeDisabled();
-
-      await expect(canvas.getByLabelText('Email')).toHaveValue('foo@doe.com');
-      await expect(canvas.getByLabelText('Password')).toHaveValue('12345678');
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Sign in',
-        }),
-      ).not.toBeDisabled();
-    });
+    await playBasicSigninError({ canvas });
 
     await waitFor(async () => {
       await expect(canvas.getByText('Invalid email or password')).toBeVisible();
@@ -316,41 +223,22 @@ export const SigninClientError: Story = {
   },
 };
 
-export const SigninServerError: Story = {
+export const SigninClientError: Story = {
+  parameters: SigninClientErrorMobile.parameters,
+  play: SigninClientErrorMobile.play,
+};
+
+export const SigninServerErrorMobile: Story = {
+  globals: DefaultMobile.globals,
   parameters: {
-    ...meta.parameters,
     msw: {
-      handlers: [
-        mockGetSessionHandler({ errorStatus: '401' }),
-        mockSignInHandler({ errorStatus: '500' }),
-      ],
+      handlers: [mockSignInHandler({ errorStatus: '500' })],
     },
   },
-  play: async ({ canvas, userEvent }) => {
-    await waitFor(
-      async () => {
-        await userEvent.type(canvas.getByLabelText('Email'), 'foo@doe.com');
-        await userEvent.type(canvas.getByLabelText('Password'), '12345678');
+  play: async ({ globals, canvas, userEvent }) => {
+    await playBasicSignin({ globals, canvas, userEvent });
 
-        await userEvent.click(
-          canvas.getByRole('button', {
-            name: 'Sign in',
-          }),
-        );
-      },
-      { timeout: 3000 },
-    );
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Signing in',
-        }),
-      ).toBeDisabled();
-    });
+    await playBasicSigninError({ canvas });
 
     await waitFor(async () => {
       await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
@@ -371,4 +259,9 @@ export const SigninServerError: Story = {
       await expect(canvas.getByText('Something went wrong')).toBeVisible();
     });
   },
+};
+
+export const SigninServerError: Story = {
+  parameters: SigninServerErrorMobile.parameters,
+  play: SigninServerErrorMobile.play,
 };

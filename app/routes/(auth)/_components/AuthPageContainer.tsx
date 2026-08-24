@@ -14,7 +14,7 @@ export default function AuthPageContainer({
         justifyContent="center"
         alignItems="center"
         sx={{
-          minHeight: '100dvh',
+          minHeight: '100svh',
         }}
       >
         <Stack
