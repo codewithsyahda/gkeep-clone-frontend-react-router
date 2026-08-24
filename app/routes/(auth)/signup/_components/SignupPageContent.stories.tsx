@@ -212,6 +212,18 @@ async function playBasicSignup({
           }),
         );
       }
+
+      await waitFor(async () => {
+        await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
+        await expect(canvas.getByLabelText('Email')).toBeDisabled();
+        await expect(canvas.getByLabelText('Password')).toBeDisabled();
+
+        await expect(
+          canvas.getByRole('button', {
+            name: 'Creating',
+          }),
+        ).toBeDisabled();
+      });
     },
     { timeout: 3000 },
   );
@@ -226,18 +238,6 @@ export const SigningUpMobile: Story = {
   },
   play: async ({ globals, canvas, userEvent }) => {
     await playBasicSignup({ globals, canvas, userEvent });
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Creating',
-        }),
-      ).toBeDisabled();
-    });
   },
 };
 
@@ -250,18 +250,6 @@ export const SignupSuccessMobile: Story = {
   globals: DefaultMobile.globals,
   play: async ({ globals, canvas, userEvent }) => {
     await playBasicSignup({ globals, canvas, userEvent });
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Creating',
-        }),
-      ).toBeDisabled();
-    });
 
     await waitFor(async () => {
       await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
@@ -285,6 +273,28 @@ export const SignupSuccess: Story = {
   play: SignupSuccessMobile.play,
 };
 
+async function playBasicSignupError({
+  canvas,
+}: Readonly<{
+  canvas: Canvas;
+}>) {
+  await waitFor(async () => {
+    await expect(canvas.getByLabelText('Fullname')).not.toBeDisabled();
+    await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
+    await expect(canvas.getByLabelText('Password')).not.toBeDisabled();
+
+    await expect(canvas.getByLabelText('Fullname')).toHaveValue('Foo Doe');
+    await expect(canvas.getByLabelText('Email')).toHaveValue('foo@doe.com');
+    await expect(canvas.getByLabelText('Password')).toHaveValue('12345678');
+
+    await expect(
+      canvas.getByRole('button', {
+        name: 'Create account',
+      }),
+    ).not.toBeDisabled();
+  });
+}
+
 export const SignupClientErrorMobile: Story = {
   globals: DefaultMobile.globals,
   parameters: {
@@ -295,33 +305,7 @@ export const SignupClientErrorMobile: Story = {
   play: async ({ globals, canvas, userEvent }) => {
     await playBasicSignup({ globals, canvas, userEvent });
 
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Creating',
-        }),
-      ).toBeDisabled();
-    });
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).not.toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).not.toBeDisabled();
-
-      await expect(canvas.getByLabelText('Fullname')).toHaveValue('Foo Doe');
-      await expect(canvas.getByLabelText('Email')).toHaveValue('foo@doe.com');
-      await expect(canvas.getByLabelText('Password')).toHaveValue('12345678');
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Create account',
-        }),
-      ).not.toBeDisabled();
-    });
+    await playBasicSignupError({ canvas });
 
     await waitFor(async () => {
       await expect(canvas.getByText('User is already exist')).toBeVisible();
@@ -344,33 +328,7 @@ export const SignupServerErrorMobile: Story = {
   play: async ({ globals, canvas, userEvent }) => {
     await playBasicSignup({ globals, canvas, userEvent });
 
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).toBeDisabled();
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Creating',
-        }),
-      ).toBeDisabled();
-    });
-
-    await waitFor(async () => {
-      await expect(canvas.getByLabelText('Fullname')).not.toBeDisabled();
-      await expect(canvas.getByLabelText('Email')).not.toBeDisabled();
-      await expect(canvas.getByLabelText('Password')).not.toBeDisabled();
-
-      await expect(canvas.getByLabelText('Fullname')).toHaveValue('Foo Doe');
-      await expect(canvas.getByLabelText('Email')).toHaveValue('foo@doe.com');
-      await expect(canvas.getByLabelText('Password')).toHaveValue('12345678');
-
-      await expect(
-        canvas.getByRole('button', {
-          name: 'Create account',
-        }),
-      ).not.toBeDisabled();
-    });
+    await playBasicSignupError({ canvas });
 
     await waitFor(async () => {
       await expect(canvas.getByText('Failed to create user')).toBeVisible();
