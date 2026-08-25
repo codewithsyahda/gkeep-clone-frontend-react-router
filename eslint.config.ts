@@ -40,7 +40,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['app/**/*.tsx'],
+    ignores: ['tests/e2e/**'],
     ...eslintPlgReactHooks.configs.flat.recommended,
   },
   tseslint.configs.recommended,
