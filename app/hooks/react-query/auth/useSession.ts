@@ -1,35 +1,31 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { authClient } from '~/lib/auth';
+import useSessionQuery, { type TUseSessionQueryOpts } from './useSessionQuery';
 
 const useSession = ({
-  queryOptions = {
-    retry: false,
-  },
+  queryOptions,
 }: Readonly<{
-  queryOptions?: {
-    retry?: boolean | number;
-  };
+  queryOptions?: TUseSessionQueryOpts;
 }> = {}) => {
-  const queried = useQuery({
-    queryKey: ['session'],
-    queryFn: async ({ signal }) => {
-      const session = await authClient.getSession({
-        fetchOptions: {
-          signal,
-          credentials: 'include',
-        },
-      });
+  const queried = useSessionQuery({
+    queryOptions: {
+      ...queryOptions,
+      queryFn: async ({ signal }) => {
+        const session = await authClient.getSession({
+          fetchOptions: {
+            signal,
+            credentials: 'include',
+          },
+        });
 
-      if (session.data) {
-        return {
-          session: session.data.user,
-        };
-      }
+        if (session.data) {
+          return {
+            session: session.data.user,
+          };
+        }
 
-      throw new Error(session.error?.message);
+        throw new Error(session.error?.message);
+      },
     },
-    retry: queryOptions.retry,
   });
 
   return queried;

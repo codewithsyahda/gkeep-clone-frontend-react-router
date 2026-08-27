@@ -131,7 +131,11 @@ export default function NotesPageLayoutContent() {
 
   const searchNotesInputRootRef = useRef<HTMLDivElement>(null);
 
-  const session = useSession();
+  const session = useSession({
+    queryOptions: {
+      refetchInterval: 1000 * 60 * 60 * 24,
+    },
+  });
 
   const sessionData = session.data?.session;
 
