@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import { EllipsisVerticalIcon, XIcon } from 'lucide-react';
 
-import DialogConfirmation from '~/routes/(notes)/_components/DialogConfirmation';
+import DialogConfirmation from '../../../../DialogConfirmation';
 import AppTopIconButtonBase from './AppTopIconButtonBase';
 
 import useDeleteNoteByIds from '~/hooks/react-query/notes/useDeleteNoteByIds';

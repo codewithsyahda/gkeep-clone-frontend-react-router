@@ -131,44 +131,18 @@ export default function NotesPageLayoutContent() {
 
   const searchNotesInputRootRef = useRef<HTMLDivElement>(null);
 
-  const session = useSession({
-    queryOptions: {
-      refetchInterval: 1000 * 60 * 60 * 24,
-    },
-  });
-
-  const sessionData = session.data?.session;
-
-  useEffect(() => {
-    if (mutSignout.isPending || mutSignout.isSuccess) return;
-
-    if (!session.isPending && !sessionData) {
-      const redirect = async () => {
-        await navigate('/signin', { replace: true });
-
-        emitSnackbarAlert({
-          alertText: 'Please sign-in first',
-          alertSeverity: 'error',
-        });
-      };
-
-      void redirect();
-    }
-  }, [
-    mutSignout.isPending,
-    mutSignout.isSuccess,
-    navigate,
-    session.isPending,
-    sessionData,
-  ]);
-
   const handleCloseDialog = () =>
     navigate({
       hash: '',
       search: location.search,
     });
 
-  if (session.isPending || mutSignout.isSuccess || !sessionData) return null;
+  const session = useSession();
+
+  const sessionData = session.data?.session;
+
+  if (!session.isFetchedAfterMount || session.isError || !sessionData)
+    return null;
 
   const dialogName = location.hash.slice(1).split('/')[0].toLowerCase();
   const isOpenDialogNoteDetail = dialogName === 'notes';

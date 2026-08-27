@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 
 import ButtonLink from '~/components/custom-mui/ButtonLink';
 import Spinner from '~/components/Spinner';
-import SidebarContentAlertContainer from '../../_components/SidebarContentAlertContainer';
+import SidebarContentAlertContainer from '~/routes/_components/SidebarContentAlertContainer';
 import DialogCreateNote from './../_components/DialogNote/DialogCreateNote';
 import ActiveNoteCard from './../_components/NoteCard/ActiveNoteCard';
 
