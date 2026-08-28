@@ -14,7 +14,7 @@ import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOut';
-import * as ActiveNotePageStories from '../ActiveNotePage.stories';
+import * as ActiveNotePageStories from '../active/ActiveNotePage.stories';
 import NotesPageLayoutContent from './../_components/NotePageLayoutContent/NotePageLayoutContent';
 import ArchivedNotesPageContent from './_components/ArchiveNotesPageContent';
 

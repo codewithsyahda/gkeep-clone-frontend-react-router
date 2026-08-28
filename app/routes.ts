@@ -12,7 +12,7 @@ export default [
   ]),
   layout('./routes/(protected)/layout.tsx', [
     layout('./routes/(protected)/(notes)/layout.tsx', [
-      index('./routes/(protected)/(notes)/page.tsx'),
+      index('./routes/(protected)/(notes)/active/page.tsx'),
       route('archive', './routes/(protected)/(notes)/archive/page.tsx'),
       route('trash', './routes/(protected)/(notes)/trash/page.tsx'),
     ]),
