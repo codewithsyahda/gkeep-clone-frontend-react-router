@@ -64,12 +64,12 @@ jobs:
         run: cd backend && pnpm ci
 
       - name: Generate backend Prisma client
-        run: cd backend && pnpm dlx prisma generate
+        run: cd backend && pnpm exec prisma generate
         env:
           DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
 
       - name: Backend Prisma migrate deploy
-        run: cd backend && pnpm dlx prisma migrate deploy
+        run: cd backend && pnpm exec prisma migrate deploy
         env:
           DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/db_e2e?schema=public'
 
