@@ -16,7 +16,6 @@ const useDeleteNoteByIds = () => {
 
         return null;
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(error);
 
         throw new Error('Failed to delete notes');

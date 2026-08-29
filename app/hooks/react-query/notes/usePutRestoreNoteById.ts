@@ -41,7 +41,6 @@ const usePutRestoreNoteById = () => {
           }>
         ).data;
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error(error);
 
         if (isAxiosError(error) && error.response) {
