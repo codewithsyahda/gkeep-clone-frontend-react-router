@@ -56,7 +56,6 @@ export default function NoteCardContainer({
         try {
           ev.currentTarget.setPointerCapture(ev.pointerId);
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.warn('Pointer capture failed:', error);
         }
 
@@ -114,7 +113,6 @@ export default function NoteCardContainer({
       try {
         ev.currentTarget.releasePointerCapture(ev.pointerId);
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.warn('Pointer capture failed:', error);
       }
     } else {
