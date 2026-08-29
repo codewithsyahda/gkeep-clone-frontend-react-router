@@ -13,39 +13,36 @@ export default defineConfig([
   globalIgnores([
     '.temp/',
     '.react-router/',
-    '!.storybook',
+    '!.storybook/',
     'build/',
     'temp/',
     'coverage/',
     'public/mockServiceWorker.js',
   ]),
   {
-    files: ['**/*.{js,ts,tsx}'],
-    plugins: {
-      js: eslintJs,
-      react: eslintPlgReact,
-    },
-    extends: ['js/recommended'],
+    files: ['**/*.js'],
+    plugins: { js: eslintJs },
+    extends: [eslintJs.configs.recommended],
+  },
+  tseslint.configs.recommended,
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { react: eslintPlgReact },
     languageOptions: {
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
+        ecmaFeatures: { jsx: true },
       },
-      globals: { ...globals.browser, ...globals.node },
     },
     rules: {
-      'no-console': 'error',
       'react/react-in-jsx-scope': 'off',
     },
   },
-  {
-    ignores: ['tests/e2e/**'],
-    ...eslintPlgReactHooks.configs.flat.recommended,
-  },
-  tseslint.configs.recommended,
   eslintPlgStorybook.configs['flat/recommended'],
   ...eslintPlgQuery.configs['flat/recommended'],
+  {
+    ignores: ['tests/e2e/**'],
+    extends: [eslintPlgReactHooks.configs.flat.recommended],
+  },
   {
     plugins: {
       'unused-imports': eslintPlgUnusedImports,
@@ -62,6 +59,15 @@ export default defineConfig([
           argsIgnorePattern: '^_',
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.{js,ts,tsx}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node },
+    },
+    rules: {
+      'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
   eslintCfgPrettier,
