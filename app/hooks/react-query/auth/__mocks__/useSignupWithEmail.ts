@@ -3,8 +3,8 @@ import { isAxiosError } from 'axios';
 
 import envConfig from '~/configs/envs';
 import axiosInstance from '~/lib/http';
-import { type TUserEntity } from '~/tests/mocks/apis/fakeDB/users';
 import type { TSuccessResponse } from '~/types/http';
+import type { TUserSession } from '~/types/models/auth';
 
 const useSignupWithEmail = () => {
   const mutation = useMutation({
@@ -26,7 +26,7 @@ const useSignupWithEmail = () => {
 
         const { user } = (
           response.data as TSuccessResponse<{
-            user: Omit<TUserEntity, 'password'>;
+            user: TUserSession;
           }>
         ).data;
 

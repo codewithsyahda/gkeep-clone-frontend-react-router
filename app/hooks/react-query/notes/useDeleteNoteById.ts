@@ -21,7 +21,7 @@ const useDeleteNoteById = () => {
         console.error(error);
 
         if (isAxiosError(error) && error.response) {
-          const errData = error.response.data as TErrorResponse<object>;
+          const errData = error.response.data as TErrorResponse;
 
           throw new ResponseError({
             status: errData.status,
