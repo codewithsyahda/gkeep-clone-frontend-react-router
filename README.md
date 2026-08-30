@@ -103,7 +103,7 @@ The application will be available at `http://localhost:5173` by default.
 There are environment variables that can be set for running the application in development mode:
 
 - `VITE_API_BASE_URL`
-- `VITE_DEV_MOCK_API`
+- `VITE_DEV_MOCK_MSW`
 - `VITE_DEV_MOCK_AUTH_SIGNED_IN`
 
 > See in more detail in the [environment variables configuration](#environment-variables) section.
