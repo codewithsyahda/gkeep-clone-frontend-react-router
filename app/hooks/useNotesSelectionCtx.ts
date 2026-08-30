@@ -1,9 +1,9 @@
-import { useContext } from 'react';
+import { use } from 'react';
 
 import { NotesSelectionContext } from '~/contexts/reactContext';
 
 const useNotesSelectionCtx = () => {
-  const ctx = useContext(NotesSelectionContext);
+  const ctx = use(NotesSelectionContext);
 
   if (!ctx) throw new Error('Cannot use the context outside the provider');
 

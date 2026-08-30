@@ -52,7 +52,7 @@ export default function DialogNoteDetailContainer({
     onClose();
   };
 
-  const updateContentNoteResetTm =
+  const updateContentNoteResetTmRef =
     useRef<ReturnType<typeof window.setTimeout>>(null);
 
   const handleUpdateContentNote = async () => {
@@ -88,10 +88,10 @@ export default function DialogNoteDetailContainer({
         alertSeverity: 'error',
       });
     } finally {
-      if (updateContentNoteResetTm.current)
-        clearTimeout(updateContentNoteResetTm.current);
+      if (updateContentNoteResetTmRef.current)
+        clearTimeout(updateContentNoteResetTmRef.current);
 
-      updateContentNoteResetTm.current = setTimeout(() => {
+      updateContentNoteResetTmRef.current = setTimeout(() => {
         patchContentNoteById.reset();
       }, 3000);
     }

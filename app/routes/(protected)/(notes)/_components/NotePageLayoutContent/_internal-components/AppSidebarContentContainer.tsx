@@ -49,6 +49,8 @@ export default function AppSidebarContentContainer({
 
     if (!appSidebarContentContainer) return;
 
+    let unselectAllTm: NodeJS.Timeout;
+
     const handlePointerUp = (ev: PointerEvent) => {
       const evTarget = ev.target as HTMLElement;
 
@@ -56,7 +58,7 @@ export default function AppSidebarContentContainer({
         evTarget.closest('[data-component="app-sidebar-content-container"]') &&
         !evTarget.closest('[data-component="note-card-container"]')
       ) {
-        setTimeout(() => notesSelectionCtx.unselectAll(), 100);
+        unselectAllTm = setTimeout(() => notesSelectionCtx.unselectAll(), 100);
       }
     };
 
@@ -64,6 +66,7 @@ export default function AppSidebarContentContainer({
 
     return () => {
       document.removeEventListener('pointerup', handlePointerUp);
+      clearTimeout(unselectAllTm);
     };
   }, [notesSelectionCtx]);
 

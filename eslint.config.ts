@@ -1,8 +1,7 @@
+import eslintReact from '@eslint-react/eslint-plugin';
 import eslintJs from '@eslint/js';
 import eslintPlgQuery from '@tanstack/eslint-plugin-query';
 import eslintCfgPrettier from 'eslint-config-prettier/flat';
-import eslintPlgReact from 'eslint-plugin-react';
-import eslintPlgReactHooks from 'eslint-plugin-react-hooks';
 import eslintPlgStorybook from 'eslint-plugin-storybook';
 import eslintPlgUnusedImports from 'eslint-plugin-unused-imports';
 import { defineConfig, globalIgnores } from 'eslint/config';
@@ -27,22 +26,18 @@ export default defineConfig([
   tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
-    plugins: { react: eslintPlgReact },
+    ignores: ['tests/e2e/**'],
+    extends: [eslintReact.configs['recommended-typescript']],
     languageOptions: {
+      parser: tseslint.parser,
       parserOptions: {
-        ecmaFeatures: { jsx: true },
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       },
-    },
-    rules: {
-      'react/react-in-jsx-scope': 'off',
     },
   },
   eslintPlgStorybook.configs['flat/recommended'],
   ...eslintPlgQuery.configs['flat/recommended'],
-  {
-    ignores: ['tests/e2e/**'],
-    extends: [eslintPlgReactHooks.configs.flat.recommended],
-  },
   {
     plugins: {
       'unused-imports': eslintPlgUnusedImports,
