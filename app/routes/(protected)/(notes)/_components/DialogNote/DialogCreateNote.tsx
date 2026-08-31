@@ -14,6 +14,7 @@ import DialogNoteActionContainer from './_internal-components/DialogNoteActionCo
 import DialogNoteEditor from './_internal-components/DialogNoteEditor';
 
 import tiptapConfig from '~/configs/tiptap';
+import ResponseError from '~/exceptions/responseError';
 import useCreateNote from '~/hooks/react-query/notes/useCreateNote';
 import emitSnackbarAlert from '~/routes/_helpers/snackbarAlert';
 import useDialogFullScreen from './_internal-hooks/useDialogFullScreen';
@@ -47,20 +48,27 @@ function DialogCreateNoteEditor({
         jsonContent: JSON.stringify(noteEditor.getJSON()),
       });
 
+      queryClient.invalidateQueries({
+        queryKey: ['notes', { isActive: true }],
+      });
+
       onClose();
 
       emitSnackbarAlert({
         alertText: 'Note created',
       });
-
-      queryClient.invalidateQueries({
-        queryKey: ['notes', { isActive: true }],
-      });
-    } catch {
-      emitSnackbarAlert({
-        alertText: 'Creating note failed',
-        alertSeverity: 'error',
-      });
+    } catch (error) {
+      if (error instanceof ResponseError) {
+        emitSnackbarAlert({
+          alertText: error.message,
+          alertSeverity: 'error',
+        });
+      } else {
+        emitSnackbarAlert({
+          alertText: (error as Error).message,
+          alertSeverity: 'error',
+        });
+      }
     }
   };
 

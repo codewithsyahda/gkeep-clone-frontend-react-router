@@ -119,8 +119,10 @@ export const mockGetNoteByIdHandler = ({
   );
 
 export const mockPostNoteHandler = ({
+  errorStatus,
   delayInfinite,
 }: Readonly<{
+  errorStatus?: '400' | '500';
   delayInfinite?: boolean;
 }> = {}) =>
   http.post(`${envConfig.api.baseUrl}/notes`, async () => {
@@ -129,6 +131,30 @@ export const mockPostNoteHandler = ({
     }
 
     await delay('real');
+
+    if (errorStatus === '400') {
+      return HttpResponse.json(
+        {
+          title: 'Body Request Validation Error',
+          status: 400,
+          detail: 'One or more body request fields are invalid.',
+          errors: {},
+        },
+        { status: 400 },
+      );
+    }
+
+    if (errorStatus === '500') {
+      return HttpResponse.json(
+        {
+          title: 'Internal Server Error',
+          status: 500,
+          detail: 'Cannot process the request.',
+          errors: {},
+        },
+        { status: 500 },
+      );
+    }
 
     return HttpResponse.json(
       {
