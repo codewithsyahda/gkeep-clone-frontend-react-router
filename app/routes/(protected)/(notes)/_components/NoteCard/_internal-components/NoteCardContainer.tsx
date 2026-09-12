@@ -119,9 +119,10 @@ export default function NoteCardContainer({
       const evTarget = ev.target as HTMLElement;
 
       if (
-        !evTarget.closest('[data-component="note-card-selection-checkbox"]')
+        !evTarget.closest('[data-component="note-card-selection-checkbox"]') &&
+        totalNotesSelection > 0
       ) {
-        if (!isSelected && totalNotesSelection) {
+        if (!isSelected) {
           notesSelectionCtx.selectOne({
             noteId,
             noteStatus,
