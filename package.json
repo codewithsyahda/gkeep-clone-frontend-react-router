@@ -31,8 +31,8 @@
     },
     "packageManager": {
       "name": "pnpm",
-      "version": "11.11.0",
-      "onFail": "download"
+      "version": "11",
+      "onFail": "error"
     }
   },
   "dependencies": {
