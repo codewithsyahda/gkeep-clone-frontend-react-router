@@ -263,8 +263,7 @@ export default function AppTopNotesSelectionBar() {
             },
           }}
         >
-          {(isSelectedActiveNotes ||
-            (isSelectedActiveNotes && isSelectedArchivedNotes)) && (
+          {isSelectedActiveNotes && !isSelectedArchivedNotes && (
             <MenuItem
               data-action-name="archive"
               disabled={disableSelectedActionBtn}
@@ -273,8 +272,7 @@ export default function AppTopNotesSelectionBar() {
               Archive
             </MenuItem>
           )}
-          {(isSelectedArchivedNotes ||
-            (isSelectedActiveNotes && isSelectedArchivedNotes)) && (
+          {isSelectedArchivedNotes && !isSelectedActiveNotes && (
             <MenuItem
               data-action-name="unarchive"
               disabled={disableSelectedActionBtn}
