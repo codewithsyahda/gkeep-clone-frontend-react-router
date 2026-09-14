@@ -549,16 +549,16 @@ export const NonTrashedNotesSelectionBar: Story = {
 
     await waitFor(async () => {
       await expect(
-        screen.getByRole('menuitem', {
+        screen.queryByRole('menuitem', {
           name: /^Archive$/,
         }),
-      ).toBeVisible();
+      ).not.toBeInTheDocument();
 
       await expect(
-        screen.getByRole('menuitem', {
+        screen.queryByRole('menuitem', {
           name: /^Unarchive$/,
         }),
-      ).toBeVisible();
+      ).not.toBeInTheDocument();
 
       await expect(
         screen.getByRole('menuitem', {
@@ -588,18 +588,6 @@ export const NonTrashedNotesSelectionBar: Story = {
     });
 
     await waitFor(async () => {
-      await expect(
-        screen.queryByRole('menuitem', {
-          name: /^Archive$/,
-        }),
-      ).not.toBeInTheDocument();
-
-      await expect(
-        screen.queryByRole('menuitem', {
-          name: /^Unarchive$/,
-        }),
-      ).not.toBeInTheDocument();
-
       await expect(
         screen.queryByRole('menuitem', {
           name: /^Trash$/,
@@ -636,16 +624,16 @@ export const NonTrashedNotesSelectionBarMobile: Story = {
 
     await waitFor(async () => {
       await expect(
-        screen.getByRole('menuitem', {
+        screen.queryByRole('menuitem', {
           name: /^Archive$/,
         }),
-      ).toBeVisible();
+      ).not.toBeInTheDocument();
 
       await expect(
-        screen.getByRole('menuitem', {
+        screen.queryByRole('menuitem', {
           name: /^Unarchive$/,
         }),
-      ).toBeVisible();
+      ).not.toBeInTheDocument();
 
       await expect(
         screen.getByRole('menuitem', {
@@ -676,18 +664,6 @@ export const NonTrashedNotesSelectionBarMobile: Story = {
     });
 
     await waitFor(async () => {
-      await expect(
-        screen.queryByRole('menuitem', {
-          name: /^Archive$/,
-        }),
-      ).not.toBeInTheDocument();
-
-      await expect(
-        screen.queryByRole('menuitem', {
-          name: /^Unarchive$/,
-        }),
-      ).not.toBeInTheDocument();
-
       await expect(
         screen.queryByRole('menuitem', {
           name: /^Trash$/,
