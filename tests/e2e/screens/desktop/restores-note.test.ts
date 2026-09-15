@@ -284,5 +284,72 @@ test.describe(() => {
       await expect(page.getByText(/^Note Title 1$/)).not.toBeVisible();
       await expect(page.getByText(/^This is a note 1\.$/)).not.toBeVisible();
     });
+
+    test(`should undo after restoring selected trashed notes with ${subsequentSelect} subsequent select`, async ({
+      page,
+      tapOrClick,
+      activeNotesPageFxt,
+      trashNotesPageFxt,
+    }) => {
+      await activeNotesPageFxt.goToTrashNotePage();
+
+      await tapOrClick(
+        page
+          .getByRole('checkbox', {
+            name: 'Select note',
+          })
+          .nth(0),
+      );
+
+      await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+      await tapOrClick(
+        page
+          .getByRole(subsequentSelect, {
+            name: 'Select note',
+          })
+          .nth(1),
+      );
+
+      await expect(page.getByText(/^2 selected$/)).toBeVisible();
+
+      await tapOrClick(
+        page.getByRole('button', {
+          name: /^Selection menu$/,
+        }),
+      );
+
+      await tapOrClick(
+        page.getByRole('menuitem', {
+          name: /^Restore$/,
+        }),
+      );
+
+      await expect(page.getByText(/^2 notes restored$/)).toBeVisible();
+
+      await tapOrClick(
+        page.getByRole('button', {
+          name: 'Undo',
+        }),
+      );
+
+      await expect(page.getByText(/^Action undone$/)).toBeVisible();
+
+      await trashNotesPageFxt.goToActiveNotePage();
+
+      await expect(page.getByText(/^Note Title 2$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 2\.$/)).not.toBeVisible();
+
+      await expect(page.getByText(/^Note Title 1$/)).not.toBeVisible();
+      await expect(page.getByText(/^This is a note 1\.$/)).not.toBeVisible();
+
+      await activeNotesPageFxt.goToTrashNotePage();
+
+      await expect(page.getByText(/^Note Title 2$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 2\.$/)).toBeVisible();
+
+      await expect(page.getByText(/^Note Title 1$/)).toBeVisible();
+      await expect(page.getByText(/^This is a note 1\.$/)).toBeVisible();
+    });
   });
 });
