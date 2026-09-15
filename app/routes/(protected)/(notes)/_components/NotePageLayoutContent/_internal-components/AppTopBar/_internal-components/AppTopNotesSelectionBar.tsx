@@ -130,6 +130,45 @@ export default function AppTopNotesSelectionBar() {
 
       emitSnackbarAlert({
         alertText: alertTextSuccess,
+        undoActionFn: async () => {
+          try {
+            if (actionName === 'archive' || actionName === 'unarchive') {
+              await Promise.all(
+                notesSelectionCtx.notes.map((n) =>
+                  patchNoteByIdMut.mutateAsync({
+                    noteId: n.noteId,
+                    data: {
+                      status: actionName === 'archive' ? 'active' : 'archived',
+                    },
+                  }),
+                ),
+              );
+            } else {
+              await Promise.all(
+                notesSelectionCtx.notes.map((n) =>
+                  patchNoteByIdMut.mutateAsync({
+                    noteId: n.noteId,
+                    data: { isTrashed: actionName !== 'trash' },
+                  }),
+                ),
+              );
+            }
+
+            queryClient.invalidateQueries({
+              queryKey: ['notes'],
+            });
+
+            emitSnackbarAlert({
+              alertText: 'Action undone',
+              alertSeverity: 'info',
+            });
+          } catch {
+            emitSnackbarAlert({
+              alertText: 'Action undone failed',
+              alertSeverity: 'error',
+            });
+          }
+        },
       });
     } catch {
       emitSnackbarAlert({

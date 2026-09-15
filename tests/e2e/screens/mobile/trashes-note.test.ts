@@ -582,6 +582,176 @@ test.describe(() => {
         });
       },
     );
+
+    [
+      {
+        otherSelection: [],
+        toastMessage: /^Note trashed$/,
+        targetedNotes: [
+          {
+            title: /^Note Title 6$/,
+            content: /^This is a note 6\.$/,
+          },
+        ],
+      },
+      {
+        otherSelection: [1],
+        toastMessage: /^2 notes trashed$/,
+        targetedNotes: [
+          {
+            title: /^Note Title 6$/,
+            content: /^This is a note 6\.$/,
+          },
+          {
+            title: /^Note Title 5$/,
+            content: /^This is a note 5\.$/,
+          },
+        ],
+      },
+      {
+        otherSelection: [1, 2],
+        toastMessage: /^3 notes trashed$/,
+        targetedNotes: [
+          {
+            title: /^Note Title 6$/,
+            content: /^This is a note 6\.$/,
+          },
+          {
+            title: /^Note Title 5$/,
+            content: /^This is a note 5\.$/,
+          },
+          {
+            title: /^Note Title 4$/,
+            content: /^This is a note 4\.$/,
+          },
+        ],
+      },
+      {
+        otherSelection: [1, 2, 3],
+        toastMessage: /^4 notes trashed$/,
+        targetedNotes: [
+          {
+            title: /^Note Title 6$/,
+            content: /^This is a note 6\.$/,
+          },
+          {
+            title: /^Note Title 5$/,
+            content: /^This is a note 5\.$/,
+          },
+          {
+            title: /^Note Title 4$/,
+            content: /^This is a note 4\.$/,
+          },
+        ],
+      },
+    ].forEach(({ otherSelection, toastMessage, targetedNotes }) => {
+      test(`should undo after trashing ${otherSelection.length + 1} searched selected ${otherSelection.length ? 'notes' : 'note'}`, async ({
+        page,
+        tapOrClick,
+        activeNotesPageFxt,
+        trashNotesPageFxt,
+      }) => {
+        await activeNotesPageFxt.appTopBar.getSearchInput().fill('note');
+
+        await expect(page.getByText(/^Active Notes$/)).toBeVisible();
+        await expect(page.getByText(/^Archived Notes$/)).toBeVisible();
+
+        await page.getByText(/^Note Title 6$/).click({
+          delay: 750,
+        });
+
+        await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+        for (const otherSelectionNth of otherSelection) {
+          await tapOrClick(
+            page
+              .getByRole('button', {
+                name: 'Select note',
+              })
+              .nth(otherSelectionNth),
+          );
+        }
+
+        await expect(
+          page.getByText(new RegExp(`^${otherSelection.length + 1} selected$`)),
+        ).toBeVisible();
+
+        await tapOrClick(
+          page.getByRole('button', {
+            name: /^Selection menu$/,
+          }),
+        );
+
+        await tapOrClick(
+          page.getByRole('menuitem', {
+            name: /^Trash$/,
+          }),
+        );
+
+        await expect(page.getByText(toastMessage)).toBeVisible();
+
+        await tapOrClick(
+          page.getByRole('button', {
+            name: 'Undo',
+          }),
+        );
+
+        await expect(page.getByText(/^Action undone$/)).toBeVisible();
+
+        await activeNotesPageFxt.goToTrashNotePage();
+
+        for (const { title, content } of targetedNotes) {
+          await expect(page.getByText(title)).not.toBeVisible();
+          await expect(page.getByText(content)).not.toBeVisible();
+        }
+
+        for (const { title, content } of [
+          {
+            title: /^Note Title 2$/,
+            content: /^This is a note 2\.$/,
+          },
+          {
+            title: /^Note Title 1$/,
+            content: /^This is a note 1\.$/,
+          },
+        ]) {
+          await expect(page.getByText(title)).toBeVisible();
+          await expect(page.getByText(content)).toBeVisible();
+        }
+
+        await trashNotesPageFxt.goToActiveNotePage();
+
+        for (const { title, content } of [
+          {
+            title: /^Note Title 6$/,
+            content: /^This is a note 6\.$/,
+          },
+          {
+            title: /^Note Title 5$/,
+            content: /^This is a note 5\.$/,
+          },
+        ]) {
+          await expect(page.getByText(title)).toBeVisible();
+          await expect(page.getByText(content)).toBeVisible();
+        }
+
+        await activeNotesPageFxt.goToArchiveNotePage();
+
+        for (const { title, content } of [
+          {
+            title: /^Note Title 4$/,
+            content: /^This is a note 4\.$/,
+          },
+          {
+            title: /^Note Title 3$/,
+            content: /^This is a note 3\.$/,
+          },
+        ]) {
+          await expect(page.getByText(title)).toBeVisible();
+          await expect(page.getByText(content)).toBeVisible();
+        }
+      });
+    });
   });
 
   test('should trash selected active notes', async ({
@@ -635,6 +805,81 @@ test.describe(() => {
 
     await expect(page.getByText(/^Note Title 5$/)).not.toBeVisible();
     await expect(page.getByText(/^This is a note 5\.$/)).not.toBeVisible();
+  });
+
+  test('should undo after trashing selected active notes', async ({
+    page,
+    tapOrClick,
+    activeNotesPageFxt,
+    trashNotesPageFxt,
+  }) => {
+    await page.getByText(/^Note Title 6$/).click({
+      delay: 750,
+    });
+
+    await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+    await tapOrClick(
+      page
+        .getByRole('button', {
+          name: 'Select note',
+        })
+        .nth(1),
+    );
+
+    await expect(page.getByText(/^2 selected$/)).toBeVisible();
+
+    await tapOrClick(
+      page.getByRole('button', {
+        name: /^Selection menu$/,
+      }),
+    );
+
+    await tapOrClick(
+      page.getByRole('menuitem', {
+        name: /^Trash$/,
+      }),
+    );
+
+    await expect(page.getByText(/^2 notes trashed$/)).toBeVisible();
+
+    await tapOrClick(
+      page.getByRole('button', {
+        name: 'Undo',
+      }),
+    );
+
+    await expect(page.getByText(/^Action undone$/)).toBeVisible();
+
+    await activeNotesPageFxt.goToTrashNotePage();
+
+    await expect(page.getByText(/^Note Title 6$/)).not.toBeVisible();
+    await expect(page.getByText(/^This is a note 6\.$/)).not.toBeVisible();
+
+    await expect(page.getByText(/^Note Title 5$/)).not.toBeVisible();
+    await expect(page.getByText(/^This is a note 5\.$/)).not.toBeVisible();
+
+    for (const { title, content } of [
+      {
+        title: /^Note Title 2$/,
+        content: /^This is a note 2\.$/,
+      },
+      {
+        title: /^Note Title 1$/,
+        content: /^This is a note 1\.$/,
+      },
+    ]) {
+      await expect(page.getByText(title)).toBeVisible();
+      await expect(page.getByText(content)).toBeVisible();
+    }
+
+    await trashNotesPageFxt.goToActiveNotePage();
+
+    await expect(page.getByText(/^Note Title 6$/)).toBeVisible();
+    await expect(page.getByText(/^This is a note 6\.$/)).toBeVisible();
+
+    await expect(page.getByText(/^Note Title 5$/)).toBeVisible();
+    await expect(page.getByText(/^This is a note 5\.$/)).toBeVisible();
   });
 
   test('should trash selected archived notes', async ({
@@ -691,5 +936,83 @@ test.describe(() => {
 
     await expect(page.getByText(/^Note Title 3$/)).not.toBeVisible();
     await expect(page.getByText(/^This is a note 3\.$/)).not.toBeVisible();
+  });
+
+  test('should undo after trashing selected archived notes', async ({
+    page,
+    tapOrClick,
+    activeNotesPageFxt,
+    archiveNotesPageFxt,
+    trashNotesPageFxt,
+  }) => {
+    await activeNotesPageFxt.goToArchiveNotePage();
+
+    await page.getByText(/^Note Title 4$/).click({
+      delay: 750,
+    });
+
+    await expect(page.getByText(/^1 selected$/)).toBeVisible();
+
+    await tapOrClick(
+      page
+        .getByRole('button', {
+          name: 'Select note',
+        })
+        .nth(1),
+    );
+
+    await expect(page.getByText(/^2 selected$/)).toBeVisible();
+
+    await tapOrClick(
+      page.getByRole('button', {
+        name: /^Selection menu$/,
+      }),
+    );
+
+    await tapOrClick(
+      page.getByRole('menuitem', {
+        name: /^Trash$/,
+      }),
+    );
+
+    await expect(page.getByText(/^2 notes trashed$/)).toBeVisible();
+
+    await tapOrClick(
+      page.getByRole('button', {
+        name: 'Undo',
+      }),
+    );
+
+    await expect(page.getByText(/^Action undone$/)).toBeVisible();
+
+    await archiveNotesPageFxt.goToTrashNotePage();
+
+    await expect(page.getByText(/^Note Title 4$/)).not.toBeVisible();
+    await expect(page.getByText(/^This is a note 4\.$/)).not.toBeVisible();
+
+    await expect(page.getByText(/^Note Title 3$/)).not.toBeVisible();
+    await expect(page.getByText(/^This is a note 3\.$/)).not.toBeVisible();
+
+    for (const { title, content } of [
+      {
+        title: /^Note Title 2$/,
+        content: /^This is a note 2\.$/,
+      },
+      {
+        title: /^Note Title 1$/,
+        content: /^This is a note 1\.$/,
+      },
+    ]) {
+      await expect(page.getByText(title)).toBeVisible();
+      await expect(page.getByText(content)).toBeVisible();
+    }
+
+    await trashNotesPageFxt.goToArchiveNotePage();
+
+    await expect(page.getByText(/^Note Title 4$/)).toBeVisible();
+    await expect(page.getByText(/^This is a note 4\.$/)).toBeVisible();
+
+    await expect(page.getByText(/^Note Title 3$/)).toBeVisible();
+    await expect(page.getByText(/^This is a note 3\.$/)).toBeVisible();
   });
 });
