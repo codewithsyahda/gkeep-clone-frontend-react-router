@@ -6,13 +6,11 @@ import '@fontsource/roboto/700.css';
 import '../app/app.css';
 
 import type { Preview } from '@storybook/react-vite';
-import { initialize, mswLoader } from 'msw-storybook-addon';
+import { mswLoader } from 'msw-storybook-addon/csf3';
 
 import { notes } from '~/tests/mocks/apis/fakeDB/notes';
 import { users } from '~/tests/mocks/apis/fakeDB/users';
 import muiThemeDecorator from './decorators/muiTheme';
-
-initialize();
 
 if (window) {
   window.sessionStorage.setItem('usersDB', JSON.stringify(users));
@@ -20,7 +18,7 @@ if (window) {
 }
 
 const preview: Preview = {
-  loaders: [mswLoader],
+  loaders: [mswLoader()],
   parameters: {
     controls: {
       matchers: {
