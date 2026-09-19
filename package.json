@@ -23,6 +23,9 @@
     "sb": "storybook dev -p 6006",
     "sb:build": "storybook build"
   },
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "devEngines": {
     "runtime": {
       "name": "node",
