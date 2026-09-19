@@ -16,6 +16,10 @@ const config: StorybookConfig = {
     'storybook-addon-remix-react-router',
   ],
   framework: '@storybook/react-vite',
+  features: {
+    experimentalReview: true,
+    experimentalDocgenServer: true,
+  },
 };
 
 export default config;
