@@ -6,17 +6,15 @@ import viteReactPlugin from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import path from 'node:path';
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const isRR7 = process.env.IS_RR7 === 'true';
 const isCI = process.env.CI === 'true';
 
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-    isRR7 ? reactRouter() : viteReactPlugin(),
-    tsconfigPaths(),
-  ],
+  plugins: [tailwindcss(), isRR7 ? reactRouter() : viteReactPlugin()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   test: {
     coverage: {
       exclude: [
