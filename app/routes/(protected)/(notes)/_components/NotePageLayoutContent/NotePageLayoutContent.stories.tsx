@@ -6,18 +6,18 @@ import {
 } from 'storybook-addon-remix-react-router';
 import { expect, screen, waitFor } from 'storybook/test';
 
-import notesSelectionDecorator from '.storybook/decorators/notesSelection';
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import notesSelectionDecorator from '#/.storybook/decorators/notesSelection';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
 import {
   mockGetSessionHandler,
   signOutLoadingHandler,
-} from '.storybook/parameters/msw/authHandlers';
+} from '#/.storybook/parameters/msw/authHandlers';
 import {
   mockGetNotesHandler,
   mockPatchNoteByIdHandler,
   mockPostNoteHandler,
   mockPutNoteByIdHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+} from '#/.storybook/parameters/msw/notesHandlers';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
 import signOutHandler from '~/tests/mocks/apis/handlers/users/signOut';

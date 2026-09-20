@@ -3,14 +3,14 @@ import { createMemoryRouter, RouterProvider } from 'react-router';
 import { Toaster } from 'sonner';
 import { expect, screen, waitFor } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import { mockGetSessionHandler } from '.storybook/parameters/msw/authHandlers';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
+import { mockGetSessionHandler } from '#/.storybook/parameters/msw/authHandlers';
 import {
   mockGetNotesHandler,
   mockPatchNoteByIdHandler,
   mockPostNoteHandler,
   mockPutNoteByIdHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+} from '#/.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import getNoteByIdHandler from '~/tests/mocks/apis/handlers/notes/getNoteById';
 import getNotesHandler from '~/tests/mocks/apis/handlers/notes/getNotes';
