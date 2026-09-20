@@ -12,13 +12,13 @@ import {
   type UserEventObject,
 } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
 import {
   mockDeleteNoteByIdHandler,
   mockGetNoteByIdHandler,
   mockPatchNoteByIdHandler,
   mockPutNoteByIdHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+} from '#/.storybook/parameters/msw/notesHandlers';
 import DialogNoteDetailComponent from './DialogNoteDetail';
 
 const meta = {

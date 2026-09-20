@@ -3,8 +3,8 @@ import { Toaster } from 'sonner';
 import type { Canvas, Globals } from 'storybook/internal/csf';
 import { expect, fn, waitFor, type UserEventObject } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import { mockPostNoteHandler } from '.storybook/parameters/msw/notesHandlers';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
+import { mockPostNoteHandler } from '#/.storybook/parameters/msw/notesHandlers';
 import DialogCreateNoteComponent from './DialogCreateNote';
 
 const meta = {

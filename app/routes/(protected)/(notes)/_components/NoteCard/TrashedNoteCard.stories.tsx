@@ -6,11 +6,11 @@ import {
 } from 'storybook-addon-remix-react-router';
 import { expect, screen, waitFor } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
 import {
   mockDeleteNoteByIdHandler,
   mockPatchNoteByIdHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+} from '#/.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import * as ActiveNoteCardStories from './ActiveNoteCard.stories';
 import TrashedNoteCardComponent from './TrashedNoteCard';

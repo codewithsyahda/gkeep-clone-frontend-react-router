@@ -5,12 +5,12 @@ import {
 } from 'storybook-addon-remix-react-router';
 import { expect, waitFor } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
 import {
   mockGetNotesHandler,
   mockPatchNoteByIdHandler,
   mockPutNoteByIdHandler,
-} from '.storybook/parameters/msw/notesHandlers';
+} from '#/.storybook/parameters/msw/notesHandlers';
 import NotesSelectionCtxProvider from '~/contexts/NotesSelectionCtxProvider';
 import ActiveNotesPageContent from './ActiveNotesPageContent';
 

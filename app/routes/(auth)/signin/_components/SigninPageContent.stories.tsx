@@ -7,8 +7,8 @@ import {
 import type { Canvas, Globals } from 'storybook/internal/csf';
 import { expect, waitFor, type UserEventObject } from 'storybook/test';
 
-import reactQueryDecorator from '.storybook/decorators/reactQuery';
-import { mockSignInHandler } from '.storybook/parameters/msw/authHandlers';
+import reactQueryDecorator from '#/.storybook/decorators/reactQuery';
+import { mockSignInHandler } from '#/.storybook/parameters/msw/authHandlers';
 import SigninPageContentComponent from './SigninPageContent';
 
 const meta = {
