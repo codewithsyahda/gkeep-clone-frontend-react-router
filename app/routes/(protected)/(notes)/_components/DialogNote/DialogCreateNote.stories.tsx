@@ -213,7 +213,9 @@ export const CreateNoteSuccessMobile: Story = {
       await expect(canvas.getByText('Note created')).toBeVisible();
     });
 
-    await expect(args.onClose).toHaveBeenCalledOnce();
+    await waitFor(async () => {
+      await expect(args.onClose).toHaveBeenCalledOnce();
+    });
   },
 };
 

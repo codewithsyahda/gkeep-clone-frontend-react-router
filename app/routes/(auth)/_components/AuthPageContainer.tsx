@@ -11,9 +11,9 @@ export default function AuthPageContainer({
   return (
     <Container maxWidth={false}>
       <Stack
-        justifyContent="center"
-        alignItems="center"
         sx={{
+          justifyContent: 'center',
+          alignItems: 'center',
           minHeight: '100svh',
         }}
       >

@@ -29,7 +29,6 @@ export default function SidebarLink({
       data-component="app-sidebar-link"
       to={to}
       direction="row"
-      alignItems="center"
       component={Link}
       spacing={2}
       style={
@@ -53,6 +52,7 @@ export default function SidebarLink({
           md: 'var(--borderRadiusMd)',
         },
         color: 'text.primary',
+        alignItems: 'center',
         p: 2,
         pl: 'var(--padLeft)',
         width: {

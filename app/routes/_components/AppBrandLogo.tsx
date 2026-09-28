@@ -8,9 +8,11 @@ export default function AppBrandLogo() {
   return (
     <Stack
       direction="row"
-      justifyContent="center"
-      alignItems="center"
       spacing={1}
+      sx={{
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
     >
       <Box
         sx={{
