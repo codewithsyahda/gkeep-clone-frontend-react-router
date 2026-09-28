@@ -7,6 +7,7 @@ import '../app/app.css';
 
 import type { Preview } from '@storybook/react-vite';
 import { mswLoader } from 'msw-storybook-addon/csf3';
+import { toast } from 'sonner';
 
 import { notes } from '~/tests/mocks/apis/fakeDB/notes';
 import { users } from '~/tests/mocks/apis/fakeDB/users';
@@ -34,6 +35,9 @@ const preview: Preview = {
     },
   },
   decorators: [muiThemeDecorator],
+  async beforeEach() {
+    toast.dismiss();
+  },
 };
 
 export default preview;
