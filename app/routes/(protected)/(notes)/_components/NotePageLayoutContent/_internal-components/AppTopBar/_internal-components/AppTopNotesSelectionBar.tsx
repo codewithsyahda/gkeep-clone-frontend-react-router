@@ -234,13 +234,21 @@ export default function AppTopNotesSelectionBar() {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Stack
           direction="row"
-          alignItems="center"
           spacing={{
             xs: 1,
             md: 2,
+          }}
+          sx={{
+            alignItems: 'center',
           }}
         >
           <div>

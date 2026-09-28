@@ -168,7 +168,13 @@ export default function SigninPageContent() {
               fullWidth
             >
               {mutSigninWithEmail.isPending && (
-                <Stack direction="row" alignItems="center" spacing={1}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <Spinner size={24} /> <span>Signing in</span>
                 </Stack>
               )}

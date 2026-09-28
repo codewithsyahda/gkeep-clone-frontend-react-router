@@ -110,12 +110,12 @@ export default function AppTopMainBar({
   return (
     <Stack
       direction="row"
-      alignItems="center"
       spacing={{
         xs: 1,
         sm: 2,
       }}
       sx={{
+        alignItems: 'center',
         height: '100%',
         width: '100%',
       }}

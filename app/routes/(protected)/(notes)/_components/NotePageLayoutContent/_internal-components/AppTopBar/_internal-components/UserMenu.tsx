@@ -119,7 +119,12 @@ export default function UserMenu({
                 </Typography>
               </div>
               <div>
-                <Stack alignItems="center" spacing={1}>
+                <Stack
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                  }}
+                >
                   <Box>
                     <Avatar
                       sx={{
