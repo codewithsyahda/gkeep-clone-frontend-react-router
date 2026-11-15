@@ -46,16 +46,13 @@ jobs:
           repository: codewithsyahda/gkeep-clone-backend-nodejs-fastify
           path: backend
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
+      - name: Setup pnpm with Node.js runtime
+        uses: pnpm/setup@v3
         with:
-          version: 11
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
+          version: ^12.21.0
+          runtime: node@24
+          install: false
+          cache: true
           cache-dependency-path: |
             frontend/pnpm-lock.yaml
             backend/pnpm-lock.yaml
@@ -100,7 +97,7 @@ jobs:
         run: pnpm dlx wait-on http-get://localhost:5010/api/health/liveness -t 30000
 
       - name: Install frontend dependencies
-        run: cd frontend && pnpm install
+        run: cd frontend && pnpm ci
 
       - name: Install Playwright Browsers
         run: cd frontend && pnpm exec playwright install --with-deps
