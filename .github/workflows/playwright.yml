@@ -129,19 +129,15 @@ jobs:
       - name: Checkout frontend repo
         uses: actions/checkout@v7
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
+      - name: Setup pnpm with Node.js runtime
+        uses: pnpm/setup@v3
         with:
-          version: 11.11.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
+          version: ^12.21.0
+          runtime: node@24
+          cache: true
 
       - name: Install frontend dependencies
-        run: pnpm install
+        run: pnpm ci
 
       - name: Download Playwright blob reports from GAs Artifacts
         uses: actions/download-artifact@v8
